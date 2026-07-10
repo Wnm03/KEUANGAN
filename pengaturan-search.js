@@ -1,0 +1,53 @@
+// pengaturan-search.js — Domain Pencarian Pengaturan: buka/tutup grup pengaturan (toggleStgGroup), cari
+// & sorot kartu pengaturan yang cocok teks pencarian (stgSearch), dan dukungan keyboard (Enter/Spasi)
+// utk buka grup pengaturan lewat kepala grup yang sedang fokus.
+// Dipindah dari features-helpers-global-security.js (v73) — potongan KEENAM stlh kalkulator-input.js
+// (v69), keamanan-pin.js (v70), modal-navigasi.js (v71), reset-gaji-mingguan.js (v72),
+// debug-console.js (v73, potongan sebelum ini di sesi yang sama). Dipilih krn domain kecil & mandiri:
+// cuma pakai document.querySelectorAll/getElementById (DOM murni), TIDAK bergantung ke D atau modul
+// lain sama sekali.
+// CATATAN: blok ini menyertakan 1 `document.addEventListener('keydown',...)` top-level yang jalan saat
+// file dimuat (bukan cuma deklarasi function) — ini AMAN dipindah krn cuma daftarkan event listener
+// baru ke window/document, tidak bergantung urutan modul lain siap atau tidak.
+// Dipanggil dari: `onclick="toggleStgGroup(...)"` & `oninput="stgSearch(...)"` di halaman Pengaturan
+// (index.html/app_production.html).
+// PENTING: file ini HARUS dimuat SETELAH features-helpers-global-security.js.
+function toggleStgGroup(id){
+var g=document.getElementById(id);
+if(!g)return;
+const isOpen=g.classList.toggle('open');
+const head=g.querySelector('.stg-group-head');
+if(head)head.setAttribute('aria-expanded',isOpen?'true':'false');
+}
+let _stgSearchHighlighted=[];
+function stgSearch(qRaw){
+const q=(qRaw||'').trim().toLowerCase();
+const resultEl=document.getElementById('stgSearchResult');
+_stgSearchHighlighted.forEach(c=>{c.style.outline='';c.style.outlineOffset='';});
+_stgSearchHighlighted=[];
+if(!q){ if(resultEl)resultEl.style.display='none'; return; }
+const cards=document.querySelectorAll('#page-settings .stg-group-body-inner .card');
+let matches=[];
+cards.forEach(card=>{
+if(card.textContent.toLowerCase().indexOf(q)!==-1) matches.push(card);
+});
+if(resultEl){
+resultEl.classList.remove('u-dnone');resultEl.style.display='block';
+resultEl.textContent=matches.length?('✅ '+matches.length+' hasil ditemukan'):'⚠️ Tidak ada pengaturan yang cocok';
+}
+matches.forEach((card,i)=>{
+const grp=card.closest('.stg-group');
+if(grp && !grp.classList.contains('open')) toggleStgGroup(grp.id);
+card.style.outline='2px solid var(--accent)';
+card.style.outlineOffset='3px';
+_stgSearchHighlighted.push(card);
+if(i===0) setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'center'}),120);
+});
+}
+document.addEventListener('keydown',function(e){
+if(e.key!=='Enter'&&e.key!==' ')return;
+const head=e.target.closest&&e.target.closest('.stg-group-head');
+if(!head)return;
+e.preventDefault();
+head.click();
+});
