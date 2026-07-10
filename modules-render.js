@@ -1,7 +1,7 @@
 // Fungsi render (85 fungsi) dipisah dari app_production.html untuk pemerataan ukuran file.
 // Semua fungsi ini murni definisi function global (bukan module), jadi tetap bisa dipanggil dari file manapun
 // yang loadnya belakangan (sama seperti modules-calc.js/features-*.js).
-const MODULE_RENDER_VERSION='kw70-tukang-riwayat-absensi-11';
+const MODULE_RENDER_VERSION='kw70-tukang-riwayat-absensi-13';
 
 function renderPageContent(name){
 if(name==='dashboard')renderDashboard();

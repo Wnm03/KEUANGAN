@@ -1123,7 +1123,14 @@ codeEl.value=isEdit?(D.sparepartCats[Sparepart.catEditIdx].code||codeFromName(D.
 codeEl.dataset.manual=isEdit?'1':'0';
 codeEl.oninput=()=>{codeEl.dataset.manual='1';};
 document.getElementById('sparepartInterval').value=isEdit?D.sparepartCats[Sparepart.catEditIdx].intervalKm:'';
+const sparepartDelBtnEl=document.getElementById('sparepartDelBtn'); if(sparepartDelBtnEl) sparepartDelBtnEl.style.display=isEdit?'':'none';
 openModal('sparepartModal');
+},
+async deleteFromModal(){
+if(Sparepart.catEditIdx===null)return;
+const before=D.sparepartCats.length;
+await Sparepart.delCat(Sparepart.catEditIdx);
+if(D.sparepartCats.length<before) closeModal('sparepartModal');
 },
 saveCat(){
 const name=document.getElementById('sparepartName').value.trim();

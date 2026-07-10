@@ -1,5 +1,5 @@
 
-const MODULE_CALC_VERSION='kw70-tukang-riwayat-absensi-11';
+const MODULE_CALC_VERSION='kw70-tukang-riwayat-absensi-13';
 const FI={
 assetScopeState:'zakatable',
 investmentAssetValue(){

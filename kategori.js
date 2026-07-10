@@ -56,7 +56,16 @@ document.getElementById('catEmoji').value=cat.emoji;
 document.getElementById('catName').value='';
 document.getElementById('catEmoji').value='💰';
 }
+const catDelBtnEl=document.getElementById('catDelBtn'); if(catDelBtnEl) catDelBtnEl.style.display=isEdit?'':'none';
 openModal('catModal');
+}
+async function delCatFromModal(){
+if(catEditIdx===null||catEditIdx===undefined)return;
+const cat=D.categories[curCatModalType][catEditIdx];
+if(!cat)return;
+const before=D.categories[curCatModalType].length;
+await delCat(cat.id,curCatModalType);
+if(D.categories[curCatModalType].length<before){ catModalCallback=null; closeModal('catModal'); }
 }
 function setCatModalType(t){
 curCatModalType=t;
@@ -93,10 +102,11 @@ cb(name);
 }
 async function delCat(id,type){
 const defaults=DEFAULT_CATS[type].map(c=>c.id);
-if(defaults.includes(id)){toast('⚠️ Kategori default tidak bisa dihapus');return;}
+const isDefault=defaults.includes(id);
 const cat=D.categories[type].find(c=>c.id===id);
 const usedCount=cat?D.transactions.filter(t=>t.category===cat.name).length:0;
-const warnMsg=usedCount?`Hapus kategori "${cat.name}"? ${usedCount} transaksi yg sudah pakai kategori ini TIDAK akan ikut terhapus, tapi kategorinya tidak akan muncul lagi di pilihan Input Transaksi.`:'Hapus kategori ini beserta subkategorinya?';
+let warnMsg=usedCount?`Hapus kategori "${cat.name}"? ${usedCount} transaksi yg sudah pakai kategori ini TIDAK akan ikut terhapus, tapi kategorinya tidak akan muncul lagi di pilihan Input Transaksi.`:'Hapus kategori ini beserta subkategorinya?';
+if(isDefault)warnMsg=`⚠️ "${cat?cat.name:''}" adalah kategori bawaan (default) aplikasi. `+warnMsg;
 if(!await askConfirm(warnMsg))return;
 D.categories[type]=D.categories[type].filter(c=>c.id!==id);
 save();renderCatList();populateCatFilter();populateKeuFilters();refreshTxCatIfOpen();toast('🗑 Kategori dihapus');
