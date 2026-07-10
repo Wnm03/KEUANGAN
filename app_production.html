@@ -53,7 +53,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Keluarga W</title>
-<link rel="stylesheet" href="styles.css?v=108">
+<link rel="stylesheet" href="styles.css?v=113">
 <script>
 /* Debug console (Eruda) — aktifkan sekali lewat ?debug=1 di URL, nempel via localStorage.
    Matikan lagi lewat ?debug=0. Tidak aktif buat user biasa. */
@@ -105,14 +105,21 @@ b.appendChild(closeBtn);
 }catch(_e){ console.error('Gagal tampilkan banner error modul:',_e); }
 };
 </script>
-<script src="app-bundle-a.min.js?v=108" onerror="window.__moduleLoadFail('app-bundle-a.min.js')"></script>
-<script src="smoke-test.js?v=108" defer></script>
+<script src="app-bundle-a.min.js?v=113" onerror="window.__moduleLoadFail('app-bundle-a.min.js')"></script>
+<script src="smoke-test.js?v=113" defer></script>
 <link rel="manifest" id="pwaManifestLink" href="manifest.json">
 </head>
 <body data-theme="dark">
 
 <!-- ONBOARDING -->
-<div class="onboard" id="onboard">
+<!-- BUGFIX: dulu div ini TIDAK punya class u-dnone, jadi selalu kelihatan sebagai kondisi
+     default begitu HTML di-paint browser -- utk user LAMA (sudah onboarding & punya PIN),
+     ini bikin layar Onboarding sempat "kekilat"/tampak numpuk bareng layar PIN selama proses
+     init() (termasuk baca data tersimpan) berjalan, sebelum akhirnya disembunyikan &
+     showPinScreen() dipanggil. Sekarang disembunyikan by default (sama seperti #pinScreen),
+     & baru dimunculkan secara eksplisit oleh init() KHUSUS utk user baru yang memang belum
+     pernah setup (lihat pemanggilan classList.remove('u-dnone') di init()). -->
+<div class="onboard u-dnone" id="onboard">
   <div class="onboard-logo">🏠 W</div>
   <div class="onboard-sub">Selamat datang!<br>Atur profil keluarga Anda dulu</div>
   <div class="u-w100" style="max-width:340px">
@@ -214,6 +221,13 @@ b.appendChild(closeBtn);
     <div class="u-mt12 u-flex u-fdcol u-gap8" id="lbBars"></div>
     <div class="u-dnone u-fs11 u-t2 u-mt8 u-r8 u-lh14" id="lbDataNote" style="padding:7px 9px;background:var(--surface2)"></div>
     <div class="u-mt10" id="lbFocus"></div>
+    </div>
+  </div>
+  <div class="card u-mb12 u-pointer" id="refleksiCard" data-action="Refleksi.open">
+    <div class="card-title">🌱 Refleksi &amp; Self-Care</div>
+    <div class="u-flex u-aic u-gap8" style="margin-top:2px">
+      <div class="u-flex1 u-fs11 u-t2 u-lh15">Jurnal syukur, checklist self-care &amp; catatan privat terenkripsi</div>
+      <div class="u-fs11 u-fw700 u-cacc3" id="refleksiStreakBadge"></div>
     </div>
   </div>
   <div class="card u-mb12 u-dnone u-pointer" id="dashBillCard" data-action="showPage" data-args='["keuangan", "$nav:1"]'>
@@ -2013,6 +2027,8 @@ b.appendChild(closeBtn);
 
 <!-- MODAL: Budget Settings -->
 <script>document.write(MODAL_HTML[64]);</script><!-- modal:budgetSettingsModal externalized to modals.js -->
-<script src="app-bundle-b.min.js?v=108" onerror="window.__moduleLoadFail('app-bundle-b.min.js')"></script>
+<script>document.write(MODAL_HTML[65]);</script><!-- modal:refleksiModal (Refleksi & Self-Care) -->
+
+<script src="app-bundle-b.min.js?v=113" onerror="window.__moduleLoadFail('app-bundle-b.min.js')"></script>
 </body>
 </html>

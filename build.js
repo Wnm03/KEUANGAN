@@ -76,6 +76,7 @@ const GROUP_B = [
   'error-handler.js',
   'helper-teks.js',
   'keamanan-pin.js',
+  'refleksi-selfcare.js',
   'modal-navigasi.js',
   'reset-gaji-mingguan.js',
   'debug-console.js',

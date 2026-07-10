@@ -28,8 +28,8 @@ if(location.hostname==='localhost'||location.hostname==='127.0.0.1')return true;
 }catch(e){ /* anggap bukan dev mode kalau gagal deteksi */ }
 return false;
 }
-const APP_BUILD_VERSION = 'kw70-tukang-riwayat-absensi-13';
-const PRODUCTION_BUILD_SYNCED_VERSION = 'kw70-tukang-riwayat-absensi-13';
+const APP_BUILD_VERSION = 'kw70-tukang-riwayat-absensi-18';
+const PRODUCTION_BUILD_SYNCED_VERSION = 'kw70-tukang-riwayat-absensi-18';
 let D = {
 schemaVersion:SCHEMA_VERSION,
 transactions:[],cobek:[],products:[],produsen:[],cobekKategori:JSON.parse(JSON.stringify(DEFAULT_COBEK_KATEGORI)),targets:[],eduFunds:[],reminders:[],bills:[],billsArchive:[],
@@ -68,6 +68,7 @@ pensiun:{aktif:false,usiaSekarang:null,usiaPensiun:58,targetDana:0,returnTahunan
 sewaKios:{units:[]},
 wealthSnapshots:[],
 lifeBalanceSnapshots:[],
+refleksi:{gratitude:[],selfCareLog:{},privateNotes:[]},
 pajakZakat:{
 hargaEmasPerGram:2640000,
 nisabPenghasilanBulan:7640144,
@@ -323,6 +324,10 @@ if(D.finansialFreedom.assumsiInflasi===undefined) D.finansialFreedom.assumsiInfl
 if(!D.finansialFreedom.assetScope) D.finansialFreedom.assetScope='zakatable';
 if(!isFinite(Number(D.finansialFreedom.scenarioRange))||Number(D.finansialFreedom.scenarioRange)<0.5||Number(D.finansialFreedom.scenarioRange)>15) D.finansialFreedom.scenarioRange=2;
 if(!D.wealthSnapshots) D.wealthSnapshots=[];
+if(!D.refleksi) D.refleksi={gratitude:[],selfCareLog:{},privateNotes:[]};
+if(!D.refleksi.gratitude) D.refleksi.gratitude=[];
+if(!D.refleksi.selfCareLog) D.refleksi.selfCareLog={};
+if(!D.refleksi.privateNotes) D.refleksi.privateNotes=[];
 if(!D.pensiun) D.pensiun={aktif:false,usiaSekarang:null,usiaPensiun:58,targetDana:0,returnTahunan:6,accId:'',kontribusiBulanan:0,rekoPersen:20,rekoBulan:3,riwayatKontribusi:[]};
 if(D.pensiun.usiaSekarang===undefined) D.pensiun.usiaSekarang=null;
 if(D.pensiun.usiaPensiun===undefined) D.pensiun.usiaPensiun=58;

@@ -1686,11 +1686,12 @@ const groups=[
 {page:'#page-carnotes',fn:(typeof setCnTab==='function')?setCnTab:null,paneId:t=>'cnTab-'+t},
 {page:'#page-cobek',fn:(typeof setCobekTab==='function')?setCobekTab:null,paneId:t=>'cobekTab-'+t},
 {page:'#page-pajak',fn:(typeof setPajakTab==='function')?setPajakTab:null,paneId:t=>'pajakTab-'+t},
-{page:'#page-keuangan',fn:(typeof setKeuanganTab==='function')?setKeuanganTab:null,paneId:t=>'keuanganTab-'+t}
+{page:'#page-keuangan',fn:(typeof setKeuanganTab==='function')?setKeuanganTab:null,paneId:t=>'keuanganTab-'+t},
+{page:'#page-keuangan',fn:(typeof BudgetTabs!=='undefined')?BudgetTabs.switchTo:null,paneId:t=>'budgetTabPane-'+t,btnClass:'.budget-tab-btn'}
 ];
 groups.forEach(g=>{
 if(!g.fn)return;
-const btns=[...document.querySelectorAll(g.page+' .cn-tab')];
+const btns=[...document.querySelectorAll(g.page+' '+(g.btnClass||'.cn-tab'))];
 if(!btns.length)return;
 const originalBtn=btns.find(b=>b.classList.contains('active'))||btns[0];
 let originalTab=null;
@@ -2216,7 +2217,7 @@ uploadBackupToDrive(true);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')tryBackupOnClose();});
 window.addEventListener('pagehide',tryBackupOnClose);
 const setup=localStorage.getItem('kw_setup');
-if(!setup){document.getElementById('onboard').style.display='flex';updateOnboardPreview();return;}
+if(!setup){const ob=document.getElementById('onboard');ob.classList.remove('u-dnone');ob.style.display='flex';updateOnboardPreview();return;}
 const pin=localStorage.getItem('kw_pin');
 if(pin){showPinScreen();return;}
 showMain();
@@ -2348,6 +2349,6 @@ Object.assign(window,{
 Etalase,Produsen,Order,FI,DanaDaruratAI,WorthIt,TimelineW,Pensiun,Budget,BudgetTabs,BudgetReko,
 Laporan,Payroll,Tukang,BBM,Sparepart,Servis,Torsi,Pelanggan,SiapPulang,RefAI,Zakat,PPh21,PajakUMKM,
 Aset,LifeBalance,Piutang,Debt,DebtStrategy,Renov,RenovAI,SewaKios,RenovCalc,Kekayaan,AlokasiAset,PBB,
-IDBStore,LinkTx,Bill,AIWidget,EduFund,PriceReko
+IDBStore,LinkTx,Bill,AIWidget,EduFund,PriceReko,Refleksi
 });
 init();

@@ -1,7 +1,7 @@
 // Fungsi render (85 fungsi) dipisah dari app_production.html untuk pemerataan ukuran file.
 // Semua fungsi ini murni definisi function global (bukan module), jadi tetap bisa dipanggil dari file manapun
 // yang loadnya belakangan (sama seperti modules-calc.js/features-*.js).
-const MODULE_RENDER_VERSION='kw70-tukang-riwayat-absensi-13';
+const MODULE_RENDER_VERSION='kw70-tukang-riwayat-absensi-18';
 
 function renderPageContent(name){
 if(name==='dashboard')renderDashboard();
@@ -567,6 +567,7 @@ renderFinancialFreedom();
 Pensiun.renderDashMini();
 Payroll.renderDashMini();
 EduFund.renderDashMini();
+Refleksi.renderDashCard();
 }
 
 function renderDashLaporanMini(inc,exp,txM){
@@ -1049,7 +1050,7 @@ wrap.innerHTML=`<div class="card-title u-mb6">🗄️ Riwayat Arsip</div>${rows}
 
 function renderSettings(){
 const diagGroupEl=document.getElementById('stgGroup6');
-if(diagGroupEl) diagGroupEl.style.display=isDevMode()?'':'none';
+if(diagGroupEl) diagGroupEl.style.display=''; // Diagnostik selalu tampil (dulu disembunyikan kalau bukan dev mode)
 renderStorageUsage();
 updateDebugConsoleBtn();
 const abvEl=document.getElementById('aboutBuildVersion'); if(abvEl) abvEl.textContent=APP_BUILD_VERSION;
