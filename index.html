@@ -53,7 +53,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Keluarga W</title>
-<link rel="stylesheet" href="styles.css?v=127">
+<link rel="stylesheet" href="styles.css?v=129">
 <script>
 /* Debug console (Eruda) — aktifkan sekali lewat ?debug=1 di URL, nempel via localStorage.
    Matikan lagi lewat ?debug=0. Tidak aktif buat user biasa. */
@@ -105,8 +105,8 @@ b.appendChild(closeBtn);
 }catch(_e){ console.error('Gagal tampilkan banner error modul:',_e); }
 };
 </script>
-<script src="app-bundle-a.min.js?v=127" onerror="window.__moduleLoadFail('app-bundle-a.min.js')"></script>
-<script src="smoke-test.js?v=127" defer></script>
+<script src="app-bundle-a.min.js?v=129" onerror="window.__moduleLoadFail('app-bundle-a.min.js')"></script>
+<script src="smoke-test.js?v=129" defer></script>
 <link rel="manifest" id="pwaManifestLink" href="manifest.json">
 </head>
 <body data-theme="dark">
@@ -1360,10 +1360,15 @@ b.appendChild(closeBtn);
     <div class="u-fs12 u-t2 u-mt8 u-lh15">Mode Otomatis ganti ke tema terang jam 06.00–18.00 dan tema gelap di luar jam itu.</div>
   </div>
 
-  <div class="card">
-    <div class="card-title">🧩 Kartu di Beranda</div>
-    <div class="u-hint10">Matikan kartu yang tidak kamu pakai (mis. Sewa Kios, Pensiun, Dana Pendidikan, Jadwal Pulang) — kartunya hilang dari Beranda DAN berhenti dihitung tiap buka Beranda, jadi lebih ringan. Kartu inti (Penasihat, Skor Hidup Seimbang, Saldo Akun, Transaksi Terakhir) selalu tampil.</div>
-    <div id="dashCardPrefsList"></div>
+  <div class="card card-collapse" id="cardKartuBeranda">
+    <div class="card-title card-collapse-head" data-action="toggleCardCollapse" data-args='["cardKartuBeranda"]' role="button" tabindex="0" aria-expanded="false" aria-controls="cardKartuBerandaBody">
+      <span>🧩 Kartu di Beranda</span>
+      <span class="card-collapse-chevron">▼</span>
+    </div>
+    <div class="card-collapse-body" id="cardKartuBerandaBody">
+      <div class="u-hint10">Matikan kartu yang tidak kamu pakai (mis. Sewa Kios, Pensiun, Dana Pendidikan, Jadwal Pulang) — kartunya hilang dari Beranda DAN berhenti dihitung tiap buka Beranda, jadi lebih ringan. Kartu inti (Penasihat, Skor Hidup Seimbang, Saldo Akun, Transaksi Terakhir) selalu tampil.</div>
+      <div id="dashCardPrefsList"></div>
+    </div>
   </div>
 
   </div></div>
@@ -2098,6 +2103,6 @@ b.appendChild(closeBtn);
 <script>document.write(MODAL_HTML[64]);</script><!-- modal:budgetSettingsModal externalized to modals.js -->
 <script>document.write(MODAL_HTML[65]);</script><!-- modal:refleksiModal (Refleksi & Self-Care) -->
 
-<script src="app-bundle-b.min.js?v=127" onerror="window.__moduleLoadFail('app-bundle-b.min.js')"></script>
+<script src="app-bundle-b.min.js?v=129" onerror="window.__moduleLoadFail('app-bundle-b.min.js')"></script>
 </body>
 </html>

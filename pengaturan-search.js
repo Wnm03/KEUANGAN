@@ -19,6 +19,15 @@ const isOpen=g.classList.toggle('open');
 const head=g.querySelector('.stg-group-head');
 if(head)head.setAttribute('aria-expanded',isOpen?'true':'false');
 }
+// Collapse per-kartu (beda dari toggleStgGroup yg collapse seluruh grup) — dipakai kartu tunggal
+// yg isinya panjang, mis. "Kartu di Beranda". `id` = id elemen .card-collapse pembungkusnya.
+function toggleCardCollapse(id){
+var c=document.getElementById(id);
+if(!c)return;
+const isOpen=c.classList.toggle('open');
+const head=c.querySelector('.card-collapse-head');
+if(head)head.setAttribute('aria-expanded',isOpen?'true':'false');
+}
 let _stgSearchHighlighted=[];
 function stgSearch(qRaw){
 const q=(qRaw||'').trim().toLowerCase();
@@ -38,6 +47,7 @@ resultEl.textContent=matches.length?('✅ '+matches.length+' hasil ditemukan'):'
 matches.forEach((card,i)=>{
 const grp=card.closest('.stg-group');
 if(grp && !grp.classList.contains('open')) toggleStgGroup(grp.id);
+if(card.classList.contains('card-collapse') && !card.classList.contains('open')) toggleCardCollapse(card.id);
 card.style.outline='2px solid var(--accent)';
 card.style.outlineOffset='3px';
 _stgSearchHighlighted.push(card);
@@ -46,7 +56,7 @@ if(i===0) setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'center'})
 }
 document.addEventListener('keydown',function(e){
 if(e.key!=='Enter'&&e.key!==' ')return;
-const head=e.target.closest&&e.target.closest('.stg-group-head');
+const head=e.target.closest&&e.target.closest('.stg-group-head,.card-collapse-head');
 if(!head)return;
 e.preventDefault();
 head.click();

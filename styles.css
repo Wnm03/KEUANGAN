@@ -60,12 +60,22 @@ body.has-open-modal .nav { display: none; }
 .stg-group-body-inner { padding: 0 12px 12px; }
 .stg-group-body-inner .card { margin-bottom: 10px; }
 .stg-group-body-inner .card:last-child { margin-bottom: 0; }
+
+/* Collapse per-kartu (beda dari .stg-group yg collapse per-grup) — dipakai kartu tunggal yg
+   isinya panjang, mis. "Kartu di Beranda" di Pengaturan, supaya bisa dilipat sendiri tanpa
+   melipat seluruh grup. */
+.card-collapse-head { cursor: pointer; user-select: none; }
+.card-collapse-chevron { font-size: 12px; color: var(--text2); transition: transform .2s ease; flex-shrink: 0; }
+.card-collapse.open .card-collapse-chevron { transform: rotate(180deg); }
+.card-collapse-body { max-height: 0; overflow: hidden; transition: max-height .25s ease; }
+.card-collapse.open .card-collapse-body { max-height: 4000px; }
 details.card summary::-webkit-details-marker{display:none}
 details.card summary{list-style:none}
 details.card summary::after{content:'▾';float:right;color:var(--text2);transition:transform .2s}
 details.card[open] summary::after{transform:rotate(180deg)}
 .card-title { font-size:var(--fs-label); font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; justify-content: space-between; }
-.card-collapse-toggle{cursor:pointer;font-size:10px;color:var(--text2);flex-shrink:0;padding:2px 2px 2px 6px;transition:transform .25s ease;display:inline-block;line-height:1}
+.card-collapse-toggle{cursor:pointer;font-size:13px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);flex-shrink:0;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;line-height:1;transition:transform .25s ease,background .15s ease;}
+.card-collapse-toggle:active{background:var(--accent-soft)}
 .card-collapse-toggle.collapsed{transform:rotate(-90deg)}
 .card-collapse-body{overflow:hidden;max-height:2000px;opacity:1;transition:max-height .3s ease, opacity .2s ease, margin-top .3s ease}
 .card-collapse-body.collapsed{max-height:0!important;opacity:0;margin-top:0!important;pointer-events:none}
