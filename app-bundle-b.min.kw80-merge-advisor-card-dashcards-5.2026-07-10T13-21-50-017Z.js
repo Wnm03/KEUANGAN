@@ -66,8 +66,8 @@ if(location.hostname==='localhost'||location.hostname==='127.0.0.1')return true;
 }catch(e){ /* anggap bukan dev mode kalau gagal deteksi */ }
 return false;
 }
-const APP_BUILD_VERSION = 'kw80-merge-advisor-card-dashcards-6';
-const PRODUCTION_BUILD_SYNCED_VERSION = 'kw80-merge-advisor-card-dashcards-6';
+const APP_BUILD_VERSION = 'kw80-merge-advisor-card-dashcards-5';
+const PRODUCTION_BUILD_SYNCED_VERSION = 'kw80-merge-advisor-card-dashcards-5';
 let D = {
 schemaVersion:SCHEMA_VERSION,
 transactions:[],cobek:[],products:[],produsen:[],cobekKategori:JSON.parse(JSON.stringify(DEFAULT_COBEK_KATEGORI)),targets:[],eduFunds:[],reminders:[],bills:[],billsArchive:[],
@@ -1540,16 +1540,7 @@ if(head)head.setAttribute('aria-expanded',isOpen?'true':'false');
 }
 // Collapse per-kartu (beda dari toggleStgGroup yg collapse seluruh grup) — dipakai kartu tunggal
 // yg isinya panjang, mis. "Kartu di Beranda". `id` = id elemen .card-collapse pembungkusnya.
-// PENTING: nama fungsi ini SENGAJA dibedakan dari toggleCardCollapse(key,ev) di modal-navigasi.js
-// (dipakai ~40+ kartu lain lewat data-action="toggleCardCollapse" dengan skema id `key+'-cbody'`/
-// `key+'-chev'`). SEBELUMNYA file ini juga mendeklarasikan global bernama `toggleCardCollapse`
-// dengan signature & skema DOM yang beda (toggle class 'open' di elemen pembungkus + cari child
-// `.card-collapse-head`) — karena file ini dimuat SETELAH modal-navigasi.js, deklarasi function
-// di sini MENIMPA punya modal-navigasi.js secara global, jadi SEMUA kartu lain (Beranda, Keuangan,
-// Laporan, Car Notes, Pajak/Zakat, dst) yang pakai data-action="toggleCardCollapse" ikut manggil
-// fungsi versi sini yang salah skema — akibatnya tombol collapse-nya diam saja / tidak berfungsi.
-// Jangan pakai nama `toggleCardCollapse` lagi di file ini.
-function toggleSingleCardCollapse(id){
+function toggleCardCollapse(id){
 var c=document.getElementById(id);
 if(!c)return;
 const isOpen=c.classList.toggle('open');
@@ -1575,7 +1566,7 @@ resultEl.textContent=matches.length?('✅ '+matches.length+' hasil ditemukan'):'
 matches.forEach((card,i)=>{
 const grp=card.closest('.stg-group');
 if(grp && !grp.classList.contains('open')) toggleStgGroup(grp.id);
-if(card.classList.contains('card-collapse') && !card.classList.contains('open')) toggleSingleCardCollapse(card.id);
+if(card.classList.contains('card-collapse') && !card.classList.contains('open')) toggleCardCollapse(card.id);
 card.style.outline='2px solid var(--accent)';
 card.style.outlineOffset='3px';
 _stgSearchHighlighted.push(card);
@@ -8149,7 +8140,7 @@ function aiErrorHint(provider,status){
 if(provider==='gemini')return(status===400||status===403)?' (cek API key di Pengaturan)':'';
 return status===401?' (API key salah/expired, cek di Pengaturan)':'';
 }
-// Advisor — pengatur tab utk card gabungan "🧭 Penasihat" (v124, kw80-merge-advisor-card-dashcards-6):
+// Advisor — pengatur tab utk card gabungan "🧭 Penasihat" (v124, kw80-merge-advisor-card-dashcards-5):
 // dulu FinCoach ("🩺 Insight Cepat", rule-based-gratis-instan) & AIWidget ("🔍 Laporan AI",
 // panggil Claude/Gemini, wajib API key) tampil sbg 2 card TERPISAH di Dashboard — sekarang
 // digabung jadi SATU card dgn 2 tab, supaya tidak terasa ada "2 penasihat AI" yang mirip2.
