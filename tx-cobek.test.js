@@ -3,53 +3,53 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { loadSource } = require('./helpers/loadSource');
 
-// isCobekStockCatName (tx-cobek.js) adalah fungsi murni (tidak baca/tulis
+// isShopStockCatName (tx-cobek.js) adalah fungsi murni (tidak baca/tulis
 // DOM, cuma baca D.categories) yang dipakai updateTxVehiclePanels() di
-// transaksi.js buat mendeteksi kapan panel Stok/Penjualan Cobek/Shop harus
+// transaksi.js buat mendeteksi kapan panel Stok/Penjualan Shop/Shop harus
 // muncul di form Transaksi. Sebelumnya nol test (lihat daftar modul tanpa
 // test di CLAUDE.md bagian ke-13) -- dipilih sbg saran RINGAN berikutnya
 // krn file-nya kecil (28 baris) & logic-nya murni, tanpa perlu mock DOM.
 function loadFn(D) {
   const ctx = loadSource(['tx-cobek.js'], { D });
-  return ctx.isCobekStockCatName;
+  return ctx.isShopStockCatName;
 }
 
 function baseD(overrides = {}) {
   return { categories: { income: [], expense: [] }, ...overrides };
 }
 
-test('isCobekStockCatName — nama kategori mengandung "cobek" (case-insensitive) => true, tanpa perlu D.categories', () => {
+test('isShopStockCatName — nama kategori mengandung "shop" (case-insensitive) => true, tanpa perlu D.categories', () => {
   const fn = loadFn(baseD());
-  assert.equal(fn('Cobek', ''), true);
-  assert.equal(fn('COBEK BATU', ''), true);
-  assert.equal(fn('jual cobek', ''), true);
+  assert.equal(fn('Shop', ''), true);
+  assert.equal(fn('SHOP BATU', ''), true);
+  assert.equal(fn('jual shop', ''), true);
 });
 
-test('isCobekStockCatName — nama kategori mengandung "shop" (case-insensitive) => true', () => {
+test('isShopStockCatName — nama kategori mengandung "shop" (case-insensitive) => true', () => {
   const fn = loadFn(baseD());
   assert.equal(fn('Shop', ''), true);
   assert.equal(fn('My Shop', ''), true);
 });
 
-test('isCobekStockCatName — nama SUBkategori yang mengandung cobek/shop juga => true, walau nama kategori induk tidak cocok', () => {
+test('isShopStockCatName — nama SUBkategori yang mengandung shop/shop juga => true, walau nama kategori induk tidak cocok', () => {
   const fn = loadFn(baseD());
-  assert.equal(fn('Bisnis Lain', 'Stok Cobek'), true);
+  assert.equal(fn('Bisnis Lain', 'Stok Shop'), true);
   assert.equal(fn('Bisnis Lain', 'Penjualan Shop'), true);
 });
 
-test('isCobekStockCatName — nama kategori & sub sama sekali tidak cocok, dan tidak ketemu di D.categories => false', () => {
+test('isShopStockCatName — nama kategori & sub sama sekali tidak cocok, dan tidak ketemu di D.categories => false', () => {
   const fn = loadFn(baseD());
   assert.equal(fn('Transport', 'Bensin'), false);
 });
 
-test('isCobekStockCatName — catName/subName undefined/null tidak bikin error (fallback ke string kosong)', () => {
+test('isShopStockCatName — catName/subName undefined/null tidak bikin error (fallback ke string kosong)', () => {
   const fn = loadFn(baseD());
   assert.equal(fn(undefined, undefined), false);
   assert.equal(fn(null, null), false);
   assert.equal(fn(), false);
 });
 
-test('isCobekStockCatName — BUGFIX-style: kategori/sub sudah di-rename user (mis. "Cobek" -> "Toko Batu"), tapi sub.id masih "sub_cb_cobek" => tetap true lewat fallback ID internal', () => {
+test('isShopStockCatName — BUGFIX-style: kategori/sub sudah di-rename user (mis. "Shop" -> "Toko Batu"), tapi sub.id masih "sub_cb_cobek" => tetap true lewat fallback ID internal', () => {
   const D = baseD({
     categories: {
       income: [],
@@ -61,12 +61,12 @@ test('isCobekStockCatName — BUGFIX-style: kategori/sub sudah di-rename user (m
     },
   });
   const fn = loadFn(D);
-  // Nama kategori & sub SENGAJA tidak mengandung kata "cobek"/"shop" sama
+  // Nama kategori & sub SENGAJA tidak mengandung kata "shop"/"shop" sama
   // sekali -- satu-satunya jalan ketemu adalah lewat sub.id yang stabil.
   assert.equal(fn('Toko Batu', 'Stok Batu'), true);
 });
 
-test('isCobekStockCatName — sub.id "sub_cbb_cobek" (varian penjualan) juga dianggap cocok lewat fallback ID', () => {
+test('isShopStockCatName — sub.id "sub_cbb_cobek" (varian penjualan) juga dianggap cocok lewat fallback ID', () => {
   const D = baseD({
     categories: {
       income: [
@@ -81,7 +81,7 @@ test('isCobekStockCatName — sub.id "sub_cbb_cobek" (varian penjualan) juga dia
   assert.equal(fn('Pemasukan Lain', 'Hasil Jualan'), true);
 });
 
-test('isCobekStockCatName — kategori ketemu by name tapi sub.id BUKAN sub_cb_cobek/sub_cbb_cobek => false', () => {
+test('isShopStockCatName — kategori ketemu by name tapi sub.id BUKAN sub_cb_cobek/sub_cbb_cobek => false', () => {
   const D = baseD({
     categories: {
       income: [],
@@ -96,7 +96,7 @@ test('isCobekStockCatName — kategori ketemu by name tapi sub.id BUKAN sub_cb_c
   assert.equal(fn('Toko Batu', 'Ongkos Kirim'), false);
 });
 
-test('isCobekStockCatName — catName ketemu tapi subName tidak ada di daftar subs kategori itu => false (tidak error)', () => {
+test('isShopStockCatName — catName ketemu tapi subName tidak ada di daftar subs kategori itu => false (tidak error)', () => {
   const D = baseD({
     categories: {
       income: [],
@@ -111,7 +111,7 @@ test('isCobekStockCatName — catName ketemu tapi subName tidak ada di daftar su
   assert.equal(fn('Toko Batu', 'Sub Yang Tidak Ada'), false);
 });
 
-test('isCobekStockCatName — fallback lewat ID juga jalan utk kategori di D.categories.income (bukan cuma expense)', () => {
+test('isShopStockCatName — fallback lewat ID juga jalan utk kategori di D.categories.income (bukan cuma expense)', () => {
   const D = baseD({
     categories: {
       income: [
@@ -123,7 +123,7 @@ test('isCobekStockCatName — fallback lewat ID juga jalan utk kategori di D.cat
     },
   });
   const fn = loadFn(D);
-  // Nama kategori & sub SENGAJA tidak mengandung "cobek"/"shop" -- satu2nya
+  // Nama kategori & sub SENGAJA tidak mengandung "shop"/"shop" -- satu2nya
   // jalan ketemu adalah lewat pencarian di D.categories.income + fallback ID.
   assert.equal(fn('Toko Serba Ada', 'Hasil Jualan'), true);
 });

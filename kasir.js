@@ -5,7 +5,7 @@
 // keranjang, panggil callAIProviderRaw yang sama dipakai AIWidget/RenovAI/dst).
 //
 // PENTING: urutan load — taruh file ini SETELAH cobek.js di GROUP_A (lihat build.js). Kasir
-// memakai fungsi/variabel dari cobek.js (recordCobekSale, D.products, dst) & features-aiwidget-
+// memakai fungsi/variabel dari cobek.js (recordShopSale, D.products, dst) & features-aiwidget-
 // reminder-gdrive-search.js (callAIProviderRaw, aiErrorHint) — SEMUA dipanggil saat RUNTIME
 // (di dalam method, bukan di top-level saat file di-load), jadi aman ditaruh di file terpisah
 // selama file-file itu sudah lebih dulu ada & sudah selesai di-load duluan.
@@ -13,7 +13,7 @@
 // TIDAK mengubah modul Order (form "🛒 Transaksi Manual" lama) sama sekali — Kasir cuma menambah
 // TAB BARU di halaman Bisnis Shop yang jadi tab default, sementara "Transaksi Manual" tetap ada
 // sbg cara lama/fallback (mis. kalau perlu edit harga per-line dari dropdown, dll). Kasir memakai
-// fungsi recordCobekSale() yang SAMA PERSIS dgn Order, jadi hasil transaksinya konsisten & tetap
+// fungsi recordShopSale() yang SAMA PERSIS dgn Order, jadi hasil transaksinya konsisten & tetap
 // tersinkron ke Keuangan + stok Etalase seperti sebelumnya.
 const Kasir={
 cart:[], // {productId, qty, hargaOverride}
@@ -206,15 +206,15 @@ const customer={name:custName,phone:custPhone,address:''};
 const date=new Date().toISOString().split('T')[0];
 const note=(document.getElementById('kasirNote')?.value||'').trim();
 const txId=uid();
-const result=recordCobekSale({
+const result=recordShopSale({
 items,subtotal,diskon,ongkir,total,profit,date,note,customer,priceType:Kasir.priceType,delivered:true,
-accountId:accId,txId,existingCobekId:null
+accountId:accId,txId,existingShopId:null
 });
 if(!result.ok){toast('⚠️ '+result.message);return;}
 const itemSummary=items.map(it=>it.name+' x'+it.qty).join(', ');
-D.transactions.push({id:txId,type:'income',amount:total,category:'Bisnis',subcategory:'Cobek',accountId:accId,payMethod:'tunai',note:(customer.name?customer.name+' - ':'')+itemSummary,date,cobekLinkId:result.cobekId});
+D.transactions.push({id:txId,type:'income',amount:total,category:'Bisnis',subcategory:'Cobek',accountId:accId,payMethod:'tunai',note:(customer.name?customer.name+' - ':'')+itemSummary,date,cobekLinkId:result.shopId});
 save();
-renderProductList();renderCobek();Order.renderRecent();renderDashboard();renderKeuangan();renderSiapPulang();
+renderProductList();renderShop();Order.renderRecent();renderDashboard();renderKeuangan();renderSiapPulang();
 toast('✅ Transaksi tersimpan & tersinkron ke Keuangan');
 Kasir.reset();
 }

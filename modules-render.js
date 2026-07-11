@@ -1,7 +1,7 @@
 // Fungsi render (85 fungsi) dipisah dari app_production.html untuk pemerataan ukuran file.
 // Semua fungsi ini murni definisi function global (bukan module), jadi tetap bisa dipanggil dari file manapun
 // yang loadnya belakangan (sama seperti modules-calc.js/features-*.js).
-const MODULE_RENDER_VERSION='kw80-absensi-pending-badge-avg-gaji-fincoach';
+const MODULE_RENDER_VERSION='kw83-test-pengaturan-search-5';
 
 function renderPageContent(name){
 if(name==='dashboard')renderDashboard();
@@ -10,7 +10,7 @@ populateKeuFilters();loadKeuFilterPrefsIntoDOM();renderKeuangan();renderBillList
 const lapTab=document.getElementById('keuanganTab-laporan');
 if(lapTab&&lapTab.style.display!=='none'){populateCatFilter();populateAccFilters();renderLaporan();}
 }
-if(name==='cobek'){renderCobekRecent();renderProductList();renderCobek();if(typeof Kasir!=='undefined')Kasir.render();}
+if(name==='shop'){renderShopRecent();renderProductList();renderShop();if(typeof Kasir!=='undefined')Kasir.render();}
 if(name==='laporan'){populateCatFilter();populateAccFilters();renderLaporan();}
 if(name==='carnotes'){renderVehicleSelect();renderCnTab();}
 if(name==='ai')initChat();
@@ -515,7 +515,7 @@ applyOneCardCollapsePref('dashSewaKiosReminderCard');
 // (localStorage + IndexedDB mirror), kalau HP hilang/rusak/di-uninstall tanpa backup, data hilang
 // total. Bukan wajib/blocking, cuma pengingat.
 const BACKUP_REMINDER_DISMISS_KEY='kw_backup_reminder_dismissed';
-const BACKUP_REMINDER_DATA_THRESHOLD=30; // total catatan (transaksi+bbm+servis+cobek) sebelum dianggap "udah lumayan banyak"
+const BACKUP_REMINDER_DATA_THRESHOLD=30; // total catatan (transaksi+bbm+servis+shop) sebelum dianggap "udah lumayan banyak"
 function renderDashboardBackupReminder(){
 const card=document.getElementById('dashBackupReminderCard');
 if(!card)return;
@@ -634,7 +634,7 @@ document.getElementById('dIncome').textContent=fmt(inc);
 document.getElementById('dExpense').textContent=fmt(exp);
 const bal=inc-exp,bEl=document.getElementById('dBalance');
 bEl.textContent=(bal<0?'-':'')+fmt(bal);bEl.className='stat-val '+(bal>=0?'green':'red');
-document.getElementById('dCobek').textContent=fmt(cobM)+(cobM>0?' 📈':'');
+document.getElementById('dShop').textContent=fmt(cobM)+(cobM>0?' 📈':'');
 const recent=[...D.transactions].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
 document.getElementById('recentTx').innerHTML=recent.length?recent.map(txHTML).join(''):'<div class="empty"><div class="empty-icon">💸</div><div class="empty-text">Belum ada transaksi</div><div class="u-mt10 u-flex u-gap8 u-jcc"><button class="btn btn-income btn-sm" data-action="openTxModal" data-args=\'["income"]\'>+ Catat Pemasukan</button><button class="btn btn-expense btn-sm" data-action="openTxModal" data-args=\'["expense"]\'>- Catat Pengeluaran</button></div></div>';
 renderDashAccList();
@@ -644,9 +644,20 @@ renderDashAccList();
 // (bukan cuma disembunyikan lewat CSS), jadi fitur yang tidak dipakai (mis. SewaKios/Pensiun)
 // tidak ikut nge-scan data tiap buka Beranda. Urutan render mengikuti DASH_RENDER_ORDER, BUKAN
 // urutan DASH_CARD_DEFS (yang dipakai checklist Pengaturan) — lihat catatan di dekat DASH_CARD_DEFS.
+// BUGFIX (2026-07-11): tiap card DIBUNGKUS try/catch sendiri-sendiri. Sebelumnya kalau SATU
+// card (mis. gara-gara data anggaran/kategori yang sudah rusak/dihapus) melempar error, seluruh
+// sisa loop ikut berhenti — semua card SETELAHNYA di DASH_RENDER_ORDER jadi tidak ter-render
+// ulang sama sekali (nyisa konten lama dari render sebelumnya) TANPA pesan apapun ke user selain
+// toast generik "Ada error kecil" dari _friendlyErrorNotice. Sekarang tiap card gagal dicatat ke
+// console.warn & dilewati SENDIRIAN — card lain tetap lanjut dirender normal.
 for(const key of DASH_RENDER_ORDER){
 const cardDef=DASH_CARD_BY_KEY[key];
-if(isDashCardOn(key))cardDef.render(dashCtx);else hideDashCardEl(cardDef.elId);
+if(!isDashCardOn(key)){hideDashCardEl(cardDef.elId);continue;}
+try{
+cardDef.render(dashCtx);
+}catch(e){
+console.warn('renderDashboard: card "'+key+'" ('+cardDef.elId+') gagal dirender, dilewati:',e);
+}
 }
 }
 

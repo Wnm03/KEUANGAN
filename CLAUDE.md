@@ -2657,3 +2657,114 @@ ini dgn cara yg sama spt bagian ke-33 (cari file source yg tidak
 direferensikan `loadSource([...])` di test manapun) sebelum mulai, jangan
 cuma percaya daftar tercatat — sudah kejadian 1x (`pengaturan-search.js`)
 kelewat dari daftar.
+
+## Catatan kerja — 2026-07-11 (bagian ke-34): test `filter-laporan.js` (di-port dari snapshot v174 ke v187 pasca-redesign Etalase)
+
+Konteks: daftar nol-test ringan→berat dari saran akhir bagian ke-33 bilang
+`filter-laporan.js` berikutnya, tapi cabang kerja proyek ini sempat belok
+duluan ke redesign tampilan kartu produk Etalase (lihat entri
+`CATATAN-CEK-CLAUDE.md` [2026-07-11] "Redesign tampilan kartu produk
+Etalase") sebelum akhirnya sesi ini balik menuntaskan `filter-laporan.js`.
+Testnya sendiri SEBELUMNYA sudah ditulis & diverifikasi penuh di sesi lain
+pd snapshot proyek yg lebih lama (sebelum redesign Etalase, versi build
+#173→#174) — sesi ini murni **port** file test itu ke snapshot v187/188 ini,
+bukan menulis dari nol. Tidak ada bug ditemukan di kode aplikasi baik dulu
+maupun sekarang — murni menambah test yg sebelumnya nol.
+
+**Kenapa perlu porting, bukan copy-paste polos:** redesign Etalase mengganti
+penamaan `cobek`→`shop` di beberapa tempat yg disentuh `goToList()`:
+`#page-cobek`→`#page-shop`, `setCobekTab()`→`setShopTab()`, parameter
+`cobekTabName`→`shopTabName`. Selain baris itu, `filter-laporan.js` di v187
+ini 100% identik dgn versi lama (`diff` cuma nunjukkan 2 baris beda, isinya
+cuma rename itu — dicek eksplisit sebelum mulai port, bukan asumsi). Jadi
+proses port-nya: copy `tests/filter-laporan.test.js` apa adanya, lalu
+`sed` rename semua `cobek*`/`Cobek*`/`#page-cobek` jadi `shop*`/`Shop*`/
+`#page-shop` (termasuk nama variabel test internal spt `cobekTabs`→
+`shopTabs`, `cobekCalls`→`shopCalls`), lalu jalankan test-nya — 51/51 pass
+tanpa perlu perubahan lain. `tests/helpers/loadSource.js` &
+`tests/helpers/fakeDom.js` di v187 ini ternyata BYTE-IDENTICAL dgn versi
+lama (dicek pakai `diff`), jadi tidak ada penyesuaian pola test yg
+dibutuhkan di luar rename cobek→shop itu.
+
+**Cakupan test (51 test, `tests/filter-laporan.test.js`):** filter panel
+Keuangan (`kf*`) & Laporan (`f*`) — `txMatchesFilters`/`txMatchesSearch`
+(murni; catatan kontrak — `txMatchesSearch` cuma me-lowercase haystack-nya,
+BUKAN query-nya, pemanggil wajib lowercase query duluan spt yg dilakukan
+`getKeuFilters()`), `getLaporanFilters`/`getKeuFilters`,
+`resetLaporanFilter`/`resetKeuFilter`, `populateCatFilter`/
+`populateKeuFilters` (termasuk cabang pertahankan-vs-fallback akun terpilih
+lama di `<select>`), `onFKatChange`/`onKfKatChange`, `toggleKeuFilter`
+(termasuk kuirk nyata: klik pertama pada panel yg `style.display` awalnya
+kosong `''` justru men-set eksplisit ke `'none'`, bukan `'block'` —
+dikonfirmasi ini perilaku production asli lewat browser, bukan bug test),
+simpan/pulihkan preferensi filter ke `localStorage` (`saveKeuFilterPrefs`/
+`loadKeuFilterPrefsIntoDOM`, dgn guard sekali-muat `_keuFilterPrefsLoaded`),
+badge jumlah filter aktif (`updateKfBadge`), paginasi list (`loadMoreTx`/
+`loadMoreLapTx`/`resetTxPageAndRender`, debounce pencarian 250ms
+`onKfSearchInput`), navigasi antar-list dgn scroll+flash-highlight
+(`goToList`, termasuk cabang `pageName`+`navIdx`, tab Shop [`etalase`/
+`produsen`/`riwayat`/`pelanggan`/fallback index 0], tab Car Notes [`servis`/
+lainnya], & elemen target yg tidak ada di DOM), dan modal ringkasan
+transaksi terfilter dari 3 scope dashboard/keuangan/laporan dgn paginasi
+100 per batch (`showFilteredTx`).
+
+**Catatan teknis (dipindah dari sesi penulisan test aslinya, masih relevan
+di sini) — 2 jebakan lintas-realm `vm`:**
+1. Variabel `let`/`const` top-level yg dideklarasikan DI DALAM file sumber
+   yg di-load (bukan lewat `extraGlobals`) — spt `txListPage`, `lapTxPage`,
+   `_keuFilterPrefsLoaded` di `filter-laporan.js` — TIDAK otomatis nempel
+   ke objek context vm yg dikembalikan `loadSource()`. Solusi:
+   `vm.runInContext('namaVar', ctx)` / `vm.runInContext('namaVar=...', ctx)`
+   ke context yg SAMA (`ctx` dari `loadSource()` IS objek context-nya) —
+   pola sudah ada di `tests/kalkulator-popup.test.js`.
+2. Objek plain yg DIBUAT & DI-RETURN oleh kode yg berjalan di dalam sandbox
+   vm (mis. `getKeuFilters()`) py `[[Prototype]]` beda dari realm host test
+   file, jadi `assert.deepEqual`/`deepStrictEqual` (mode strict) SELALU
+   gagal walau isinya identik ("same structure but are not
+   reference-equal"). Solusi: JSON round-trip (helper `plain()` di
+   `tests/filter-laporan.test.js`) sebelum dibandingkan.
+
+Juga: `createFakeDocument()` (`tests/helpers/fakeDom.js`) menerapkan
+`initial` lewat `Object.assign(newElement, initial)` — MERATAKAN accessor
+getter/setter kustom (elemen `<select>` tiruan yg py `.options` "hidup",
+dibutuhkan `populateKeuFilters()` yg baca `[...kfAcc.options]` SETELAH
+nulis `.innerHTML`) jadi cuma snapshot statis. Elemen yg butuh accessor
+beneran harus disuntik lewat override `getElementById` langsung, bukan
+lewat parameter `initial`.
+
+**Diverifikasi:**
+- `node --test tests/*.test.js` → **1020/1020 pass, 0 fail** (naik dari 969
+  sebelum sesi ini, +51 test baru [filter-laporan], 0 regresi).
+- `node build.js` → sukses, versi naik dari `kw83-test-pengaturan-search-3`
+  ke `kw83-test-pengaturan-search-4`, build #188, kedua bundle lolos
+  `node --check` sintaks, `FILE-MAP.md` diregenerasi (`filter-laporan.js`
+  otomatis hilang dari daftar nol-test).
+- Smoke-test browser (Playwright + Chrome headless) → `✅ [smoke-test] OK —
+  999 referensi getElementById() & 56 data-action semuanya valid`, 0
+  `pageerror`. Dicoba juga live di browser (bukan cuma smoke-test generik):
+  `showPage('keuangan',...)` → `toggleKeuFilter()` → `resetKeuFilter()` →
+  `showFilteredTx('dashboard','all','Test Dashboard')` (modal kebuka, judul
+  benar) → `goToList('page-etalase',null,undefined,'etalase')` (fungsi
+  `setShopTab` pasca-redesign terkonfirmasi ada & jalan) — semua tanpa
+  error.
+- `npm run lint`/`npx eslint` TIDAK bisa dites di sesi ini (sandbox tanpa
+  internet, `npm install`/`npx` gagal 403) — tolong jalankan `npm run lint`
+  sebelum merge/release. (Sudah beberapa sesi berturut2 tidak bisa dites
+  krn keterbatasan sandbox yg sama.)
+
+**Untuk sesi berikutnya — daftar modul nol-test yg TERSISA** (dicek ulang
+sesi ini via pola `loadSource(['nama-file.js']` di seluruh `tests/*.test.js`,
+BUKAN cuma percaya catatan lama — sesuai pesan peringatan di saran bagian
+ke-33 yg bilang `pengaturan-search.js` pernah kelewat): `kasir.js`,
+`sewakios.js`, `linktx.js`, `modal-navigasi.js`, `payroll-absensi.js`,
+`renovasi.js`, `tagihan-kalender.js`, `backup-restore.js`,
+`features-aiwidget-reminder-gdrive-search.js`. Catatan tambahan: `cobek.js`
+SUDAH dapat test (`tests/cobek.test.js`, ditambahkan bareng redesign
+Etalase) jadi TIDAK perlu dikerjakan lagi; `features-sheets-pwa-selftest.js`
+SEBAGIAN tercakup (`parsePzNum`/`parseDecStr` via `extractFunction` di
+`tests/parse-angka.test.js`) tapi belum full coverage kalau mau digarap
+menyeluruh. Ukuran file (buat estimasi urutan ringan→berat, belum diverifikasi
+ulang barisnya krn tidak semua file dicek `wc -l` sesi ini): `kasir.js` &
+`sewakios.js` termasuk yg lebih ringan, `backup-restore.js` &
+`features-aiwidget-reminder-gdrive-search.js` termasuk yg terberat di sisa
+daftar ini.

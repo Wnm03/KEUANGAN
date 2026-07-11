@@ -13,6 +13,84 @@
 
 ## SUDAH SELESAI (terverifikasi)
 
+- ✅ **[2026-07-11] 2 bug dari laporan screenshot user (build v188): renderDashboard() crash
+  "Cannot set properties of null (setting 'textContent')" & toast "Tombol ini belum berfungsi
+  (setCobekTab)".**
+  1. **Isolasi error per-card di `renderDashboard()`** (`modules-render.js`): loop
+     `DASH_RENDER_ORDER` sebelumnya memanggil `cardDef.render(dashCtx)` TANPA try/catch —
+     kalau SATU card melempar error (mis. data anggaran/kategori yang sudah rusak), SISA card
+     setelahnya di urutan render (`laporanMini`/`fi`/`pensiun`/`absensi`/`eduFund`/`refleksi`)
+     ikut TIDAK ter-render ulang sama sekali, user cuma dapat toast generik "Ada error kecil"
+     dari `_friendlyErrorNotice` tanpa tahu card mana yang bermasalah. Sekarang tiap card
+     dibungkus try/catch sendiri, kegagalan dicatat `console.warn` & dilewati — card lain tetap
+     lanjut normal.
+  2. **`Budget.renderDashMini()` diperkeras** (`features-budget-laporan-carnotes-pelanggan.js`):
+     4 elemen anak (`dashBudgetUsed`/`dashBudgetLimit`/`dashBudgetPct`/`dashBudgetBar`) dulu
+     diambil & langsung ditulis TANPA null-check (beda dari pola card lain, mis.
+     `renderDashLaporanMini` sudah `if(!trendEl||!katEl)return;`) — inilah sumber paling
+     mungkin dari "Cannot set properties of null (setting 'textContent')" yang dilaporkan user
+     persis di test self-test "renderDashboard() ikut memanggil mini-card Anggaran". Sekarang
+     ke-4 elemen dicek dulu sebelum ditulis, fallback `card.style.display='none'` kalau ada yang
+     hilang (bukan crash).
+  3. **Alias kompatibilitas mundur `setCobekTab`→`setShopTab`** (`cobek.js`): tombol tab Bisnis
+     Shop di-rename dari `setCobekTab` ke `setShopTab` saat redesign Etalase (lihat entri
+     redesign di atas), tapi PWA yang service worker-nya belum sempat refresh HTML (skenario:
+     app dibuka offline/cache lama) masih bisa menyimpan markup LAMA dengan
+     `data-action="setCobekTab"` sementara bundle JS SUDAH ter-update ke versi baru → tombol itu
+     memanggil fungsi yang sudah tidak ada, persis toast "Tombol ini belum berfungsi
+     (setCobekTab)" yang dilaporkan user. Source `index.html`/`app_production.html`/`cobek.js`
+     saat ini SUDAH 100% pakai `setShopTab` (dicek eksplisit, tidak ada sisa `setCobekTab` di
+     source) — alias ini murni jaring pengaman transisi utk kombinasi HTML-lama+JS-baru di sisi
+     klien, bukan tanda ada bug rename yang belum tuntas.
+  **Verifikasi:** `npm test` → 1020/1020 pass (tidak ada test lama yang berubah perilakunya).
+  `node build.js` → sukses, versi naik ke build #189
+  (`kw83-test-pengaturan-search-5`/`kw-cache-v189`). Direproduksi & dikonfirmasi via Playwright +
+  Chrome headless: `renderDashboard()` dgn `D.budgets` terisi tidak lagi melempar error tak
+  tertangani; `setCobekTab('etalase', el)` dipanggil langsung → berhasil pindah tab tanpa error
+  (membuktikan alias jalan). Sisa 1 kegagalan self-test yang TIDAK terkait laporan user
+  (`loadMoreBbmList` tanpa aria-label) sudah ada SEBELUM perubahan ini & bukan bagian dari 2 bug
+  yang dilaporkan — belum dikerjakan di sesi ini, lihat "BELUM DIKERJAKAN" di bawah.
+
+- ✅ **[2026-07-11] Test `filter-laporan.js`** (lanjutan daftar nol-test
+  ringan→berat dari bagian ke-33 `pengaturan-search.js`; sempat tertunda
+  krn cabang kerja ini fokus ke redesign Etalase dulu). File 220 baris (221
+  di versi sebelum redesign Etalase — beda cuma penamaan `cobek`→`shop`:
+  `#page-cobek`→`#page-shop`, `setCobekTab`→`setShopTab`,
+  `cobekTabName`→`shopTabName`, fungsinya identik). Test-nya sendiri
+  awalnya ditulis & diverifikasi di snapshot v174 (belum ada redesign
+  Etalase), lalu di-port ke sini dgn menyesuaikan penamaan tsb — bukan
+  ditulis ulang dari nol. Cakupan: filter panel Keuangan (`kf*`) & Laporan
+  (`f*`) — `txMatchesFilters`/`txMatchesSearch` (murni), `getLaporanFilters`/
+  `getKeuFilters`/`resetLaporanFilter`/`resetKeuFilter`/`populateCatFilter`/
+  `populateKeuFilters`/`onFKatChange`/`onKfKatChange`/`toggleKeuFilter`,
+  simpan/pulihkan preferensi filter ke localStorage (`saveKeuFilterPrefs`/
+  `loadKeuFilterPrefsIntoDOM`, dgn guard sekali-muat `_keuFilterPrefsLoaded`),
+  badge jumlah filter aktif (`updateKfBadge`), paginasi list (`loadMoreTx`/
+  `loadMoreLapTx`/`resetTxPageAndRender`, debounce pencarian
+  `onKfSearchInput`), navigasi antar-list dgn scroll+highlight (`goToList`,
+  termasuk cabang tab Shop `etalase`/`produsen`/`riwayat`/`pelanggan` &
+  Car Notes), & modal ringkasan transaksi terfilter dari 3 scope
+  dashboard/keuangan/laporan dgn paginasi 100/batch (`showFilteredTx`).
+  **Tidak ada bug ditemukan** — murni menambah test yg sebelumnya nol.
+  `npm test` → 1020/1020 pass (naik dari 969, +51 test baru). `node
+  build.js` → sukses, versi naik ke build #188, `FILE-MAP.md` diregenerasi.
+  Smoke-test browser (Playwright + Chrome headless) → bersih, 0
+  `pageerror`, `✅ [smoke-test] OK`; dicoba juga live: `toggleKeuFilter()`,
+  `resetKeuFilter()`, `showFilteredTx('dashboard','all',...)`,
+  `goToList('page-etalase',null,undefined,'etalase')` — semua jalan &
+  fungsi `setShopTab` (nama baru pasca-redesign) terkonfirmasi ada &
+  terpanggil dgn benar. **Daftar nol-test ringan→berat BELUM tuntas** —
+  sisa (per pengecekan `loadSource([...])` di seluruh `tests/*.test.js`
+  sesi ini, TAPI cek ulang lagi krn 1x sudah kejadian ada file kelewat):
+  `kasir.js`, `sewakios.js`, `linktx.js`, `modal-navigasi.js`,
+  `payroll-absensi.js`, `renovasi.js`, `tagihan-kalender.js`,
+  `backup-restore.js`, `features-aiwidget-reminder-gdrive-search.js`.
+  (`cobek.js` SUDAH punya test — ditambahkan bareng redesign Etalase;
+  `features-sheets-pwa-selftest.js` SEBAGIAN tercakup lewat `extractFunction`
+  di `tests/parse-angka.test.js`, belum full.) Detail teknis test & jebakan
+  `vm`/`fakeDom.js` yg ditemukan: lihat `CLAUDE.md`, catatan kerja
+  2026-07-11 bagian ke-34.
+
 - ✅ **[2026-07-11] Redesign tampilan kartu produk Etalase (tab Bisnis Shop → Etalase) jadi lebih profesional.**
   Sebelumnya kartu produk pakai layout generik `.tx-item` (sama seperti baris riwayat
   transaksi biasa). Sekarang pakai layout khusus `.shop-product-card` (di `styles.css`):
@@ -111,7 +189,10 @@
   795, +18 test baru). `node build.js` → sukses, versi naik ke build #173.
   Smoke-test browser (Playwright + Chrome headless) → bersih, 0 `pageerror`.
   Detail lengkap: lihat `CLAUDE.md`, catatan kerja 2026-07-11 bagian ke-32.
-  Sisa daftar nol-test berikutnya: `filter-laporan.js`.
+  Sisa daftar nol-test berikutnya: `filter-laporan.js` (✅ SELESAI —
+  lihat entri paling atas file ini; catatan: sesi berikutnya sempat
+  loncat duluan ke `pengaturan-search.js` sebelum akhirnya balik
+  mengerjakan `filter-laporan.js`, urutan bukan strict berurutan).
 
 - ✅ **[2026-07-11] Test `profil-pengaturan.js`** (lanjutan daftar nol-test
   ringan→berat, setelah `error-handler.js`/`onboarding.js` &
@@ -296,6 +377,12 @@
   - `npm test` → 103/103 pass, 0 fail.
 
 ## BELUM DIKERJAKAN (butuh tindak lanjut di sesi berikutnya)
+
+- Self-test "UI: elemen interaktif (data-action) yang cuma berisi ikon/emoji/tanpa teks wajib
+  punya aria-label" gagal utk `<button data-action="loadMoreBbmList">` (BBM.renderList() di
+  `features-budget-laporan-carnotes-pelanggan.js`, sekitar variabel `bbmMoreWrap`) — tombol
+  "muat lebih banyak" ini dirender tanpa teks/aria-label. TIDAK terkait 2 bug dari screenshot
+  user (sudah ada sebelum sesi ini), belum diperbaiki krn di luar scope laporan user kali ini.
 
 _(kosong — tidak ada item pending per 2026-07-11)_
 

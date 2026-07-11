@@ -2,7 +2,7 @@
 // PENTING: file ini HARUS dimuat sesuai urutan build.js (GROUP_A/GROUP_B) karena beberapa modul saling referensi. Urutan grup ini: pajak-pbb-zakat.js, features-budget-laporan-carnotes-pelanggan.js, edukasi-dana.js, sewakios.js, hidup-seimbang.js, linktx.js, renovasi.js, aset.js, worthit.js
 // CATATAN: MODULE_FEATURES_VERSION, VEHTAX_INPUT_IDS, MY_WRENCH, CHAT_ACTION_LABELS DIPINDAH ke sini dari features-etalase-piutang-renovai.js (file itu dihapus, sisa 3 konstanta kecilnya sudah tidak punya file sendiri lagi — semua ditaruh dekat kode yang benar-benar memakainya di domain ini: VEHTAX_INPUT_IDS dekat VEHTAX_ITEMS, MY_WRENCH dekat modul Torsi, CHAT_ACTION_LABELS dekat CHAT_ACTION_HANDLERS/CHAT_ACTION_EDIT_FIELDS).
 
-const MODULE_FEATURES_VERSION='kw83-test-pengaturan-search-3';
+const MODULE_FEATURES_VERSION='kw83-test-pengaturan-search-5';
 const Budget={
 editId:null,
 curIcon:'🍚',
@@ -313,10 +313,21 @@ const now=new Date(),m=now.getMonth(),y=now.getFullYear();
 const totalLim=D.budgets.reduce((s,b)=>s+Budget.getEffectiveLimit(b,m,y),0);
 const totalUsed=D.budgets.reduce((s,b)=>s+Budget.getUsed(b,m,y),0);
 const pct=totalLim>0?Math.round((totalUsed/totalLim)*100):0;
-document.getElementById('dashBudgetUsed').textContent=fmt(totalUsed);
-document.getElementById('dashBudgetLimit').textContent=fmt(totalLim);
-document.getElementById('dashBudgetPct').textContent=pct+'%';
+// BUGFIX (2026-07-11): dulu 4 elemen anak ini (dashBudgetUsed/dashBudgetLimit/dashBudgetPct/
+// dashBudgetBar) diambil & langsung ditulis TANPA null-check, beda dari pola card lain di
+// Beranda (mis. renderDashLaporanMini sudah `if(!trendEl||!katEl)return;`). Kalau salah satu
+// elemen ini kosong (mis. margin race saat DOM belum sempat penuh ter-render, atau markup
+// custom yang belum lengkap), `.textContent=`/`.style.width=` di elemen null melempar
+// "Cannot set properties of null" & ikut menjatuhkan SISA renderDashboard() (lihat bugfix
+// terkait di modules-render.js: loop DASH_RENDER_ORDER sekarang juga diisolasi per-card).
+const usedEl=document.getElementById('dashBudgetUsed');
+const limEl=document.getElementById('dashBudgetLimit');
+const pctEl=document.getElementById('dashBudgetPct');
 const bar=document.getElementById('dashBudgetBar');
+if(!usedEl||!limEl||!pctEl||!bar){card.style.display='none';return;}
+usedEl.textContent=fmt(totalUsed);
+limEl.textContent=fmt(totalLim);
+pctEl.textContent=pct+'%';
 bar.style.width=Math.min(pct,100)+'%';
 bar.className='budget-bar-fill '+(pct>=100?'over':pct>=80?'warn':'ok');
 card.classList.remove('u-dnone');card.style.display='block';

@@ -11,8 +11,8 @@
 > file tapi lupa `node build.js`), jalankan ulang generatornya, JANGAN diedit
 > tangan — editan manual bakal ketimpa lagi di build berikutnya.
 
-Terakhir digenerate: 2026-07-11T12:30:25.778Z
-Total file source: 50 · Total identifier global: 857
+Terakhir digenerate: 2026-07-11T13:48:45.380Z
+Total file source: 50 · Total identifier global: 858
 
 ## 1. Urutan load & ringkasan tiap file
 
@@ -21,14 +21,14 @@ bundler menggabungkan semua file jadi `app-bundle-a.min.js`/`app-bundle-b.min.js
 
 | # | File | Baris | Ringkasan |
 |---|------|------:|-----------|
-| 1 | `modules-render.js` | 1389 | Fungsi render (85 fungsi) dipisah dari app_production.html untuk pemerataan ukuran file. Semua fungsi ini murni definisi function global (bukan module), jadi tetap bisa dipanggil dari file manapun yang loadnya … |
+| 1 | `modules-render.js` | 1400 | Fungsi render (85 fungsi) dipisah dari app_production.html untuk pemerataan ukuran file. Semua fungsi ini murni definisi function global (bukan module), jadi tetap bisa dipanggil dari file manapun yang loadnya … |
 | 2 | `modals.js` | 7 | Modal HTML dipisah dari app_production.html untuk pemerataan ukuran file. Setiap elemen array persis sama dengan blok <div class="overlay" id="...">...</div> aslinya, di-inject balik ke posisi yang sama persis via … |
 | 3 | `modules-calc.js` | 856 | _(tidak ada komentar header)_ |
-| 4 | `cobek.js` | 1287 | Domain Shop: etalase/stok produk, produsen, order pelanggan, laporan omzet, data pelanggan, widget dashboard "🤖 Rekomendasi Harga Jual AI" (PriceRekoWidget, kw73) & "📦 Rekomendasi Restock AI" (StockRekoWidget, kw74) — … |
+| 4 | `cobek.js` | 1295 | Domain Shop: etalase/stok produk, produsen, order pelanggan, laporan omzet, data pelanggan, widget dashboard "🤖 Rekomendasi Harga Jual AI" (PriceRekoWidget, kw73) & "📦 Rekomendasi Restock AI" (StockRekoWidget, kw74) — … |
 | 5 | `kasir.js` | 222 | Modul "🧠 Kasir AI" (v127, kw81-kasir-ai-pos): Tab checkout BARU utk halaman Bisnis Shop yang lebih cepat dari form "Transaksi Manual" (Order) lama: tap produk langsung dari grid (bukan pilih dari dropdown lalu klik "+ … |
 | 6 | `piutang-utang.js` | 352 | Domain Piutang & Utang: catatan piutang (uang dipinjamkan), utang (uang dipinjam) beserta status lunas/cicilan, dan DebtStrategy (simulasi strategi pelunasan Avalanche/Snowball). Juga berisi Bill (helper hubungkan … |
 | 7 | `pajak-pbb-zakat.js` | 343 | Kalkulator Pajak Bumi & Bangunan (PBB), Zakat (penghasilan, maal, fitrah), Referensi AI (cek harga emas/nisab via AI), Pajak UMKM, dan PPh 21 (Orang Pribadi) Dipisah dari: features-renovasi-pajak-aset-order.js (PBB, … |
-| 8 | `features-budget-laporan-carnotes-pelanggan.js` | 1483 | Budget & laporan keuangan, Car Notes (BBM/servis/torsi baut), aksi AI chat, data pelanggan PENTING: file ini HARUS dimuat sesuai urutan build.js (GROUP_A/GROUP_B) karena beberapa modul saling referensi. Urutan grup ini: … |
+| 8 | `features-budget-laporan-carnotes-pelanggan.js` | 1494 | Budget & laporan keuangan, Car Notes (BBM/servis/torsi baut), aksi AI chat, data pelanggan PENTING: file ini HARUS dimuat sesuai urutan build.js (GROUP_A/GROUP_B) karena beberapa modul saling referensi. Urutan grup ini: … |
 | 9 | `edukasi-dana.js` | 174 | Dana Pendidikan (EduFund): kalkulator target biaya sekolah/kuliah & nabung/bulan CATATAN: modul EduFund dipindah ke file baru ini dari features-edukasi-pajak-utang-sewakios.js (v60). EduFund.checkAI() masih memanggil … |
 | 10 | `sewakios.js` | 243 | Domain Sewa Kios: catat unit kios yang disewakan, riwayat tagihan sewa, ROI vs modal renovasi, laporan PDF. Dipisah dari: features-edukasi-pajak-utang-sewakios.js (lanjutan roadmap PEMISAHAN-FILE-ROADMAP.md, v58). … |
 | 11 | `hidup-seimbang.js` | 219 | Domain Skor Hidup Seimbang: skor gabungan dari Dana Darurat, DSR cicilan, No-Spend 30 hari, & keseimbangan kerja-istirahat, plus riwayat snapshot bulanan. Dipisah dari: features-edukasi-pajak-utang-sewakios.js (lanjutan … |
@@ -796,6 +796,7 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `setCatModalType` | `kategori.js` |
 | `setCnPeriode` | `features-tukang-kendaraan-storage.js` |
 | `setCnTab` | `features-tukang-kendaraan-storage.js` |
+| `setCobekTab` | `cobek.js` |
 | `setDashServisVehFilter` | `features-tukang-kendaraan-storage.js` |
 | `setKeuanganTab` | `tx-list-cashflow.js` |
 | `setPayMethod` | `transaksi.js` |

@@ -1,5 +1,5 @@
 
-const MODULE_CALC_VERSION='kw80-absensi-pending-badge-avg-gaji-fincoach';
+const MODULE_CALC_VERSION='kw83-test-pengaturan-search-5';
 const FI={
 assetScopeState:'zakatable',
 investmentAssetValue(){
@@ -665,7 +665,7 @@ out.push({id:'fi-surplus-neg',level:'warning',icon:'🟠',text:`Rata-rata surplu
 }
 }
 }catch(e){console.warn('FinCoach: gagal cek surplus FI',e);}
-// 8. Bisnis Shop (Cobek): margin profit bulan ini turun jauh (<=75%) dari bulan lalu, min. 3 transaksi biar tidak false-positive dari data sedikit
+// 8. Bisnis Shop (Shop): margin profit bulan ini turun jauh (<=75%) dari bulan lalu, min. 3 transaksi biar tidak false-positive dari data sedikit
 try{
 const cobThis=D.cobek.filter(t=>{const d=new Date(t.date);return d.getMonth()===m&&d.getFullYear()===y;});
 const prevD=new Date(y,m-1,1);
@@ -673,7 +673,7 @@ const cobPrev=D.cobek.filter(t=>{const d=new Date(t.date);return d.getMonth()===
 const marginOf=rows=>{const omzet=rows.reduce((s,t)=>s+(t.total||0),0);const profit=rows.reduce((s,t)=>s+(t.profit||0),0);return omzet>0?profit/omzet:null;};
 const mThis=marginOf(cobThis),mPrev=marginOf(cobPrev);
 if(mThis!=null&&mPrev!=null&&mPrev>0&&mThis<mPrev*0.75&&cobThis.length>=3){
-out.push({id:'cobek-margin',level:'warning',icon:'🟠',text:`Margin profit Shop bulan ini turun ke ${Math.round(mThis*100)}% (bulan lalu ${Math.round(mPrev*100)}%) — cek lagi harga modal/jual produk terbaru.`,action:{label:'Lihat Shop',page:'cobek',navIdx:2}});
+out.push({id:'shop-margin',level:'warning',icon:'🟠',text:`Margin profit Shop bulan ini turun ke ${Math.round(mThis*100)}% (bulan lalu ${Math.round(mPrev*100)}%) — cek lagi harga modal/jual produk terbaru.`,action:{label:'Lihat Shop',page:'shop',navIdx:2}});
 }
 }catch(e){console.warn('FinCoach: gagal cek margin Shop',e);}
 // 9. Target tabungan yang hampir tercapai (90-99%) — penguat positif, bukan cuma peringatan melulu

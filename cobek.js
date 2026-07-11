@@ -1205,6 +1205,14 @@ if(t==='riwayat'){renderShop();renderShopGrafik();}
 if(t==='jual')renderShopRecent();
 if(t==='pelanggan')renderCustomerList();
 }
+// BUGFIX (2026-07-11): alias kompatibilitas mundur. `setCobekTab` di-rename jadi `setShopTab`
+// saat redesign Etalase (lihat CATATAN-CEK-CLAUDE.md), tapi PWA yang service worker-nya belum
+// sempat ganti ke bundle baru (mis. buka app pas offline / cache belum ke-refresh) masih bisa
+// menyimpan HTML LAMA dgn `data-action="setCobekTab"` di tombol tab Bisnis Shop, sehingga
+// begitu bundle JS baru ini ter-load, tombol lama itu memanggil fungsi yang sudah tidak ada →
+// muncul toast "Tombol ini belum berfungsi (setCobekTab)". Alias tipis ini membuat kombinasi
+// HTML lama + JS baru tetap berfungsi sampai service worker sempat menyegarkan HTML-nya juga.
+function setCobekTab(t,el){return setShopTab(t,el);}
 
 function openProdusenModal(id){return Produsen.openModal(id);}
 function saveProdusen(){return Produsen.save();}
