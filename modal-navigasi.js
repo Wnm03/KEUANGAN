@@ -252,3 +252,33 @@ window.addEventListener('mouseup',onEnd);
 }
 function openQS(id){document.getElementById(id).classList.add('open');_syncNavVisibilityForModals();}
 function closeQS(id){document.getElementById(id).classList.remove('open');_syncNavVisibilityForModals();}
+
+// SARAN (dari review sebelumnya): dukung tombol Escape utk nutup modal, tidak cuma tap ✕/backdrop.
+// Urutan prioritas: kalkulator popup (di atas modal lain) -> quick-switcher (qsXxx) -> modal
+// sistem generik (confirm/prompt/choice/info/pinPrompt -- ini WAJIB lewat resolver `_xxxAnswer`-nya
+// masing2, BUKAN closeModal() biasa, supaya Promise yg lagi nunggu (await askConfirm(), dst) tetap
+// ke-resolve, bukan nge-hang selamanya) -> modal fitur generik (.overlay.open biasa, dipilih yg
+// z-index paling tinggi kalau lebih dari 1 yg terbuka bertumpuk, spt renovItemModal di atas
+// renovDetailModal). Escape TIDAK dipakai kalau fokus lagi di input/textarea yg sedang autocomplete
+// suggest-box terbuka (biar tidak nutup modal saat user cuma mau tutup dropdown saran).
+document.addEventListener('keydown', function(e){
+if(e.key!=='Escape')return;
+const calc=document.getElementById('calcModal');
+if(calc&&calc.classList.contains('open')){ closeCalc(); return; }
+const qs=document.querySelector('.qs-modal-overlay.open');
+if(qs){ closeQS(qs.id); return; }
+const pinPrompt=document.getElementById('pinPromptModalOverlay');
+if(pinPrompt&&pinPrompt.classList.contains('open')){ _pinPromptAnswer(null); return; }
+const promptM=document.getElementById('promptModalOverlay');
+if(promptM&&promptM.classList.contains('open')){ _promptModalAnswer(null); return; }
+const choiceM=document.getElementById('choiceModalOverlay');
+if(choiceM&&choiceM.classList.contains('open')){ _choiceModalAnswer(null); return; }
+const confirmM=document.getElementById('confirmModalOverlay');
+if(confirmM&&confirmM.classList.contains('open')){ _confirmModalAnswer(false); return; }
+const infoM=document.getElementById('infoModalOverlay');
+if(infoM&&infoM.classList.contains('open')){ _infoModalAnswer(); return; }
+const openOverlays=Array.from(document.querySelectorAll('.overlay.open'));
+if(!openOverlays.length)return;
+openOverlays.sort((a,b)=>(parseInt(getComputedStyle(b).zIndex)||0)-(parseInt(getComputedStyle(a).zIndex)||0));
+closeModal(openOverlays[0].id);
+});

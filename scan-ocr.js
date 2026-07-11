@@ -4,6 +4,15 @@
 // ini murni scan OCR, jadi di v88 filenya di-rename jadi scan-ocr.js (isi tidak berubah, cuma nama file + komentar).
 // PENTING: file ini HARUS dimuat sesuai urutan build.js (GROUP_A/GROUP_B) karena beberapa modul saling referensi. Urutan grup ini: data-default.js, features-helpers-global-security.js, diagnostik-versi.js, format-tema.js, error-handler.js, helper-teks.js, keamanan-pin.js, modal-navigasi.js, reset-gaji-mingguan.js, debug-console.js, pengaturan-search.js, onboarding.js, kalkulator-input.js, scan-ocr.js, filter-laporan.js, akun.js, gaji-calc.js, transaksi.js, profil-pengaturan.js, kategori.js, tagihan-kalender.js, backup-restore.js, payroll-absensi.js, features-tukang-kendaraan-storage.js, features-aiwidget-reminder-gdrive-search.js, features-sheets-pwa-selftest.js
 
+// BUGFIX: semua fungsi scan* di file ini dulu punya pengecekan `if(typeof Tesseract==='undefined')`
+// SEBELUM memanggil ocrRecognize() -- niatnya kasih pesan jelas kalau modul OCR belum siap. Tapi
+// Tesseract cuma didaftarkan sbg global lewat ensureTesseract() di DALAM getOcrWorker() di bawah,
+// yang HANYA dipanggil dari ocrRecognize(). Jadi di scan pertama kali (fresh session, Tesseract
+// belum pernah dimuat), pengecekan itu selalu true & langsung return SEBELUM ocrRecognize/
+// ensureTesseract sempat jalan -- OCR jadi tidak akan pernah bisa jalan sama sekali di scan
+// pertama manapun (chicken-egg deadlock). Fix: pengecekan itu dihapus dari semua scan* function;
+// biarkan ocrRecognize() yang coba muat modulnya, kegagalan (termasuk modul gagal dimuat) tetap
+// ditangani & dikasih pesan jelas lewat scanErrorMessage() di catch block masing2 fungsi.
 let _ocrWorkerPromise=null;
 function getOcrWorker(){
 if(!_ocrWorkerPromise){
@@ -98,7 +107,6 @@ inp.onchange=async(e)=>{
 const file=e.target.files[0]; if(!file)return;
 toast('🔍 Memindai gambar, mohon tunggu...',6000);
 try{
-if(typeof Tesseract==='undefined'){toast('⚠️ Modul scan gagal dimuat (cek koneksi internet)');return;}
 const result=await ocrRecognize(file);
 const text=result&&result.data?result.data.text:'';
 const rawNums=text.match(/\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{1,2})?|\d{4,}/g)||[];
@@ -137,7 +145,6 @@ inp.onchange=async(e)=>{
 const file=e.target.files[0]; if(!file)return;
 toast('🔍 Memindai bukti transfer, mohon tunggu...',6000);
 try{
-if(typeof Tesseract==='undefined'){toast('⚠️ Modul scan gagal dimuat (cek koneksi internet)');return;}
 const result=await ocrRecognize(file);
 const text=result&&result.data?result.data.text:'';
 const rawNums=text.match(/\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{1,2})?|\d{4,}/g)||[];
@@ -163,7 +170,6 @@ inp.onchange=async(e)=>{
 const file=e.target.files[0]; if(!file)return;
 toast('🔍 Memindai foto, mohon tunggu...',6000);
 try{
-if(typeof Tesseract==='undefined'){toast('⚠️ Modul scan gagal dimuat (cek koneksi internet)');return;}
 const result=await ocrRecognize(file);
 const text=result&&result.data?result.data.text:'';
 const iso=extractDateFromText(text);
@@ -187,7 +193,6 @@ inp.onchange=async(e)=>{
 const file=e.target.files[0]; if(!file)return;
 toast('🔍 Memindai foto odometer, mohon tunggu...',6000);
 try{
-if(typeof Tesseract==='undefined'){toast('⚠️ Modul scan gagal dimuat (cek koneksi internet)');return;}
 const result=await ocrRecognize(file);
 const text=result&&result.data?result.data.text:'';
 const km=extractOdometerKm(text);
@@ -276,7 +281,13 @@ const m=text.match(/\b([A-Z]{2,10})\s*\/\s*(USDT|USDC|BUSD|IDR|BTC|ETH)\b/);
 return m?m[1]:null;
 }
 const ASSET_NAME_LABEL_RE=/nama\s*(produk|reksa\s*dana|instrumen|aset|saham|koin|barang)?\s*[:\-]?/i;
-const ASSET_NAME_EXCLUDE_RE=/^(rp|total|nilai|profit|untung|rugi|modal|harga|jumlah|detail|kembali|beli|jual|topup|top up|edit|invest|portofolio|riwayat|transaksi|saldo|dompet|wallet|home|beranda|profil|pengaturan|cari|search|filter|urutkan|semua|lainnya|pasar uang|reksa dana|saham|deposito|obligasi|kripto|nilai portofolio|nilai sekarang|imbal hasil|keuntungan)$/i;
+// BUGFIX: screenshot Bibit "Pasar Uang" (folder tujuan investasi) punya breadcrumb subtitle
+// pendek "Rumah" tepat di bawah judul halaman -- ini nama FOLDER TUJUAN (goal) bawaan Bibit,
+// BUKAN nama produk reksa dana. Karena pendek (≤8 char), lolos semua filter panjang/huruf, dan
+// tidak match kata kunci "rp|total|nilai|...", jadi ke-pilih salah sbg Nama Aset padahal nama
+// produk asli ("Majoris Pasar Uang Syariah Indonesia") ada di bawah, di luar window 8 baris
+// pertama yg dicek. Tambahkan nama2 folder tujuan umum Bibit ke exclude list.
+const ASSET_NAME_EXCLUDE_RE=/^(rp|total|nilai|profit|untung|rugi|modal|harga|jumlah|detail|kembali|beli|jual|topup|top up|edit|invest|portofolio|riwayat|transaksi|saldo|dompet|wallet|home|beranda|profil|pengaturan|cari|search|filter|urutkan|semua|lainnya|pasar uang|reksa dana|saham|deposito|obligasi|kripto|nilai portofolio|nilai sekarang|imbal hasil|keuntungan|rumah|pendidikan|pensiun|dana darurat|liburan|kendaraan|nikah|umroh|haji)$/i;
 const STATUS_BAR_LINE_RE=/^\d{1,2}[:.]\d{2}\b/;
 function guessAssetNameFromText(text){
 const lines=String(text).split('\n').map(l=>l.trim()).filter(Boolean).filter(l=>!STATUS_BAR_LINE_RE.test(l));
@@ -305,7 +316,6 @@ const box=document.getElementById('assetScanCandidates');
 if(box){box.style.display='block';box.innerHTML='🔍 Memindai gambar, mohon tunggu...';}
 toast('🔍 Memindai gambar, mohon tunggu...',6000);
 try{
-if(typeof Tesseract==='undefined'){toast('⚠️ Modul scan gagal dimuat (cek koneksi internet)');if(box){box.style.display='none';box.innerHTML='';}return;}
 const result=await ocrRecognize(file);
 const text=result&&result.data?result.data.text:'';
 const filledMeta=[];
@@ -382,7 +392,6 @@ inp.onchange=async(e)=>{
 const file=e.target.files[0]; if(!file)return;
 toast('🔍 Memindai gambar, mohon tunggu...',6000);
 try{
-if(typeof Tesseract==='undefined'){toast('⚠️ Modul scan gagal dimuat (cek koneksi internet)');return;}
 const result=await ocrRecognize(file);
 const text=result&&result.data?result.data.text:'';
 const rawNums=text.match(/\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{1,2})?|\d{4,}/g)||[];
@@ -425,7 +434,6 @@ inp.onchange=async(e)=>{
 const file=e.target.files[0]; if(!file)return;
 toast('🔍 Memindai struk, mohon tunggu...',6000);
 try{
-if(typeof Tesseract==='undefined'){toast('⚠️ Modul scan gagal dimuat (cek koneksi internet)');return;}
 const result=await ocrRecognize(file);
 const text=result&&result.data?result.data.text:'';
 const rawNums=text.match(/\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{1,2})?|\d{4,}/g)||[];
@@ -658,7 +666,6 @@ inp.onchange=async(e)=>{
 const file=e.target.files[0]; if(!file)return;
 toast('🔍 Memindai screenshot checkout, mohon tunggu...',6000);
 try{
-if(typeof Tesseract==='undefined'){toast('⚠️ Modul scan gagal dimuat (cek koneksi internet)');return;}
 const result=await ocrRecognize(file);
 const text=result&&result.data?result.data.text:'';
 const name=guessCheckoutItemName(text);

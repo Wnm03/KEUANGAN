@@ -2,7 +2,7 @@
 // PENTING: file ini HARUS dimuat sesuai urutan build.js (GROUP_A/GROUP_B) karena beberapa modul saling referensi. Urutan grup ini: pajak-pbb-zakat.js, features-budget-laporan-carnotes-pelanggan.js, edukasi-dana.js, sewakios.js, hidup-seimbang.js, linktx.js, renovasi.js, aset.js, worthit.js
 // CATATAN: MODULE_FEATURES_VERSION, VEHTAX_INPUT_IDS, MY_WRENCH, CHAT_ACTION_LABELS DIPINDAH ke sini dari features-etalase-piutang-renovai.js (file itu dihapus, sisa 3 konstanta kecilnya sudah tidak punya file sendiri lagi — semua ditaruh dekat kode yang benar-benar memakainya di domain ini: VEHTAX_INPUT_IDS dekat VEHTAX_ITEMS, MY_WRENCH dekat modul Torsi, CHAT_ACTION_LABELS dekat CHAT_ACTION_HANDLERS/CHAT_ACTION_EDIT_FIELDS).
 
-const MODULE_FEATURES_VERSION='kw80-merge-advisor-card-dashcards-6';
+const MODULE_FEATURES_VERSION='kw80-merge-advisor-card-dashcards-39';
 const Budget={
 editId:null,
 curIcon:'🍚',
@@ -600,17 +600,28 @@ const noteFull='BBM'+(veh?' '+veh.name:'')+(spbu?' - '+spbu:'')+(note?' - '+note
 const isEdit=BBM.editId!==null;
 const existing=isEdit?D.bbmLogs.find(x=>x.id===BBM.editId):null;
 if(isEdit&&!existing){toast('⚠️ Data tidak ditemukan');return;}
-const txId=isEdit?(existing.txLinkId||null):uid();
+// BUGFIX: catatan BBM "yatim" (existing.txLinkId hilang, mis. transaksi
+// terkaitnya kehapus manual) dulu SILENTLY tetap tidak tersinkron kalau
+// diedit, krn txId jatuh ke null & cabang "if(txId)" di bawah dilewati.
+// Sekarang: kalau ketahuan yatim saat edit, generate txId baru & buat
+// ulang transaksinya (sama seperti alur catatan baru), bukan dibiarkan.
+const wasOrphan=isEdit&&!existing.txLinkId;
+const txId=isEdit?(existing.txLinkId||uid()):uid();
 const result=recordBbmLog({
 vehicleId:curVehicleId,date,km,liter,harga,cost,spbu,fullTank,note,accountId:accId,
 txId,existingBbmId:isEdit?BBM.editId:null
 });
 if(isEdit){
-if(txId){
+if(wasOrphan){
+D.transactions.push({id:txId,type:'expense',amount:cost,category:resolveVehicleTxCategory(veh),subcategory:'Bensin',accountId:accId,payMethod:'tunai',note:noteFull,date,bbmLinkId:result.bbmId});
+const b=D.bbmLogs.find(x=>x.id===result.bbmId);
+if(b)b.txLinkId=txId;
+toast('✅ Catatan BBM diperbarui & disinkron ulang ke Keuangan');
+}else{
 const tx=D.transactions.find(t=>t.id===txId);
 if(tx)Object.assign(tx,{amount:cost,date,accountId:accId,note:noteFull});
-}
 toast('✅ Catatan BBM diperbarui');
+}
 } else {
 D.transactions.push({id:txId,type:'expense',amount:cost,category:resolveVehicleTxCategory(veh),subcategory:'Bensin',accountId:accId,payMethod:'tunai',note:noteFull,date,bbmLinkId:result.bbmId});
 toast('✅ Catatan BBM tersimpan & tersinkron ke Keuangan');

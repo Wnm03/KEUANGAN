@@ -1,5 +1,5 @@
 
-const MODULE_CALC_VERSION='kw80-merge-advisor-card-dashcards-6';
+const MODULE_CALC_VERSION='kw80-merge-advisor-card-dashcards-39';
 const FI={
 assetScopeState:'zakatable',
 investmentAssetValue(){

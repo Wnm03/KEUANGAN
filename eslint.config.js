@@ -89,7 +89,7 @@ module.exports = [
       'app-bundle-a.min.js',
       'app-bundle-b.min.js',
       '*.min.js',
-      'PEMISAHAN-FILE-ROADMAP.md',
+      'archive/**',
       '*.html',
     ],
   },

@@ -115,7 +115,7 @@ function collectAppGlobals() {
   return globals;
 }
 
-module.exports = { collectAppGlobals, getAllSourceFiles };
+module.exports = { collectAppGlobals, getAllSourceFiles, collectFromFile, maskNonTopLevel };
 
 if (require.main === module) {
   console.log(JSON.stringify(collectAppGlobals(), null, 2));

@@ -133,7 +133,23 @@ return /kendaraan|transport|motor|vario|beat|grandmax/i.test(catName||'');
 }
 function resolveVehicleTxCategory(vehicle){
 const vehName=vehicle&&vehicle.name?vehicle.name:'';
-let cat=D.categories.expense.find(c=>c.name.trim().toLowerCase()===vehName.trim().toLowerCase());
+const vehId=vehicle&&vehicle.id?vehicle.id:null;
+// BUGFIX: dulu kategori per-kendaraan dicari HANYA lewat cocok nama persis
+// (cat.name===vehicle.name). Begitu kategori itu di-rename lewat menu
+// Kategori (lihat kategori.js:saveCat, yg SUDAH benar menyesuaikan
+// transaksi LAMA ke nama baru), pencarian nama di sini jadi tidak ketemu
+// lagi utk catatan BBM/servis BERIKUTNYA -> silently jatuh ke kategori
+// "Transport" umum, tercampur dgn kendaraan lain, tanpa ada pesan apapun.
+// Sekarang kategori kendaraan disimpan pakai link stabil `linkedVehicleId`
+// begitu ketemu/dibuat pertama kali, jadi tetap ke-track walau nama
+// kategori (atau nanti nama kendaraan, kalau suatu saat ada fitur rename
+// kendaraan) berubah. Data lama tanpa `linkedVehicleId` tetap kompatibel
+// lewat fallback cocok-nama seperti sebelumnya.
+let cat=vehId?D.categories.expense.find(c=>c.linkedVehicleId===vehId):null;
+if(!cat){
+cat=D.categories.expense.find(c=>c.name.trim().toLowerCase()===vehName.trim().toLowerCase());
+if(cat&&vehId)cat.linkedVehicleId=vehId;
+}
 if(!cat) cat=D.categories.expense.find(c=>/^transport$/i.test(c.name));
 if(!cat){
 cat={id:'cat_'+slugify('Transport')+'_'+uid(),name:'Transport',emoji:'🏍️',subs:[]};
@@ -155,20 +171,10 @@ if(!isKendaraanCatName(catName))return false;
 if(isBensinSubName(subName))return false;
 return true;
 }
-function isCobekStockCatName(catName,subName){
-if(/cobek|shop/i.test(catName||'')||/cobek|shop/i.test(subName||''))return true;
-// Fallback robust terhadap rename kategori/subkategori: cocokkan lewat ID internal
-// yang tetap 'sub_cb_cobek'/'sub_cbb_cobek' walau nama tampilannya sudah diubah user
-// (mis. dari "Cobek" jadi "Shop") -- ini yang bikin panel Stok/Penjualan Shop hilang
-// kalau hanya mengandalkan cocokkan teks nama saja.
-const allCats=[...(D.categories.income||[]),...(D.categories.expense||[])];
-const cat=allCats.find(c=>c.name===catName);
-if(cat){
-const sub=(cat.subs||[]).find(s=>s.name===subName);
-if(sub&&(sub.id==='sub_cb_cobek'||sub.id==='sub_cbb_cobek'))return true;
-}
-return false;
-}
+// Catatan: isCobekStockCatName (detektor kategori Stok/Penjualan Cobek/Shop)
+// dipindah ke tx-cobek.js (lihat CLAUDE.md catatan kerja "split transaksi.js"
+// bagian ke-9) -- tetap fungsi global, tetap dipanggil persis sama dari
+// updateTxVehiclePanels() di bawah ini.
 function updateTxVehiclePanels(){
 const stockPanel=document.getElementById('txStockPanel');
 const bbmPanel=document.getElementById('txBbmPanel');
@@ -217,200 +223,28 @@ toggleTxCobekSaleFields();
 resetTxCobekSaleCart();
 }
 }
-function populateTxBbmVehicleSelect(){
-const sel=document.getElementById('txBbmVehicle');
-if(!sel||!D.vehicles)return;
-const cur=sel.value;
-sel.innerHTML=D.vehicles.map(v=>`<option value="${v.id}">${v.emoji} ${escapeHtml(v.name)}</option>`).join('');
-const fallback=(typeof curVehicleId!=='undefined'&&D.vehicles.find(v=>v.id===curVehicleId))?curVehicleId:(D.vehicles[0]&&D.vehicles[0].id);
-sel.value=cur&&D.vehicles.find(v=>v.id===cur)?cur:fallback;
-}
-function toggleTxBbmFields(){
-const chk=document.getElementById('txSyncBbm');
-const fields=document.getElementById('txBbmFields');
-if(!chk||!fields)return;
-fields.style.display=chk.checked?'block':'none';
-if(chk.checked)populateTxBbmVehicleSelect();
-}
-function syncTxBbmAmt(){
-const liter=parseFloat(document.getElementById('txBbmLiter').value);
-const harga=parseFloat(document.getElementById('txBbmHargaL').value);
-if(liter&&harga){
-document.getElementById('txAmt').value=Math.round(liter*harga);
-}else{
-syncTxAmtToLiterForce();
-}
-}
-function syncTxAmtToLiter(){
-const chk=document.getElementById('txSyncBbm');
-if(!chk||!chk.checked)return;
-syncTxAmtToLiterForce();
-}
-function syncTxAmtToLiterForce(){
-const hargaEl=document.getElementById('txBbmHargaL');
-const literEl=document.getElementById('txBbmLiter');
-const harga=parseFloat(hargaEl.value);
-const amt=parseFloat(document.getElementById('txAmt').value);
-if(harga>0&&amt>0){
-literEl.value=(amt/harga).toFixed(2);
-}
-}
-function recordBbmLog(opts){
-let harga=opts.harga;
-if(!harga&&opts.liter)harga=Math.round(opts.cost/opts.liter);
-if(!D.bbmLogs)D.bbmLogs=[];
-if(opts.existingBbmId){
-const b=D.bbmLogs.find(x=>x.id===opts.existingBbmId);
-if(b){
-Object.assign(b,{date:opts.date,km:opts.km,liter:opts.liter,harga,cost:opts.cost,spbu:opts.spbu,fullTank:opts.fullTank,note:opts.note,accountId:opts.accountId,vehicleId:opts.vehicleId||b.vehicleId});
-return{bbmId:b.id,isNew:false,harga};
-}
-}
-const bbmId=uid();
-D.bbmLogs.push({id:bbmId,vehicleId:opts.vehicleId,date:opts.date,km:opts.km,liter:opts.liter,harga,cost:opts.cost,spbu:opts.spbu,fullTank:opts.fullTank,note:opts.note,accountId:opts.accountId,txLinkId:opts.txId});
-return{bbmId,isNew:true,harga};
-}
-function applyTxBbmFromTx(txId,amt,date,accId,note,existingTx){
-const chk=document.getElementById('txSyncBbm');
-if(!chk||!chk.checked)return;
-const panel=document.getElementById('txBbmPanel');
-if(!panel||panel.style.display==='none')return;
-const km=parseFloat(document.getElementById('txBbmKm').value);
-const liter=parseFloat(document.getElementById('txBbmLiter').value);
-const harga=parseFloat(document.getElementById('txBbmHargaL').value);
-if(!km||!liter){toast('⚠️ Isi KM & Liter BBM dulu, atau hilangkan centang sinkron BBM');return;}
-const spbu=document.getElementById('txBbmSpbu').value.trim();
-const fullTank=document.getElementById('txBbmFull').checked;
-const vehSel=document.getElementById('txBbmVehicle');
-const vehicleId=vehSel&&vehSel.value?vehSel.value:((typeof curVehicleId!=='undefined'&&curVehicleId)||(D.vehicles[0]&&D.vehicles[0].id));
-const result=recordBbmLog({
-vehicleId,date,km,liter,harga,cost:amt,spbu,fullTank,note,accountId:accId,
-txId,existingBbmId:(existingTx&&existingTx.bbmLinkId)?existingTx.bbmLinkId:null
-});
-if(!existingTx||!existingTx.bbmLinkId){
-const tx=existingTx||D.transactions.find(t=>t.id===txId);
-if(tx)tx.bbmLinkId=result.bbmId;
-}
-toast('⛽ Catatan BBM tersinkron ke Catatan Mobil');
-}
-function populateTxStockSelect(){
-const sel=document.getElementById('txStockItem');
-if(!sel)return;
-const cur=sel.value;
-sel.innerHTML='<option value="__new__">➕ Sparepart Baru</option>'+D.partsStock.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} (stok ${p.qty}${p.unit?' '+p.unit:''})</option>`).join('');
-sel.value=cur&&D.partsStock.find(p=>p.id===cur)?cur:'__new__';
-onTxStockItemChange();
-}
-function onTxStockItemChange(){
-const sel=document.getElementById('txStockItem');
-const wrap=document.getElementById('txStockNewWrap');
-if(!sel||!wrap)return;
-const isNew=sel.value==='__new__';
-wrap.style.display=isNew?'block':'none';
-if(isNew){
-const noteVal=document.getElementById('txNote').value.trim();
-const nameEl=document.getElementById('txStockNewName');
-if(nameEl&&!nameEl.value) nameEl.value=noteVal;
-}
-}
-function toggleTxStockFields(){
-const chk=document.getElementById('txAddStock');
-const fields=document.getElementById('txStockFields');
-if(!chk||!fields)return;
-fields.style.display=chk.checked?'block':'none';
-if(chk.checked) populateTxStockSelect();
-}
-function applyTxStockFromTx(note){
-const chk=document.getElementById('txAddStock');
-if(!chk||!chk.checked)return;
-const panel=document.getElementById('txStockPanel');
-if(!panel||panel.style.display==='none')return;
-const itemSel=document.getElementById('txStockItem').value;
-const qty=parseFloat(document.getElementById('txStockQty').value)||0;
-const unit=document.getElementById('txStockUnit').value.trim()||'pcs';
-if(qty<=0){toast('⚠️ Jumlah stok yang ditambah harus lebih dari 0');return;}
-if(itemSel==='__new__'){
-const name=(document.getElementById('txStockNewName').value.trim())||note||'Sparepart Baru';
-let cat=D.sparepartCats.find(c=>c.name.toLowerCase()===name.toLowerCase());
-if(!cat){
-cat={id:'sp_'+Date.now(),name,code:codeFromName(name),intervalKm:0};
-D.sparepartCats.push(cat);
-}
-const prefix=cat.code||codeFromName(name);
-const seq=D.partsStock.filter(p=>p.code&&p.code.startsWith(prefix+'-')).length+1;
-const code=prefix+'-'+String(seq).padStart(3,'0');
-const existing=D.partsStock.find(p=>p.catId===cat.id&&p.name.toLowerCase()===name.toLowerCase());
-if(existing){
-existing.qty=(existing.qty||0)+qty;
-} else {
-D.partsStock.push({id:'st_'+Date.now(),name,catId:cat.id,code,qty,unit,minStock:1,price:0,note:'Otomatis dari transaksi keuangan'});
-}
-toast(`📦 Kategori & stok "${name}" otomatis dibuat (+${qty} ${unit})`);
-} else {
-const p=D.partsStock.find(x=>x.id===itemSel);
-if(p){
-p.qty=(p.qty||0)+qty;
-toast(`📦 Stok "${escapeHtml(p.name)}" bertambah +${qty} ${unit}`);
-}
-}
-renderStockList();
-}
-function openTargetModal(){
-['tName','tAmt','tSaved'].forEach(id=>document.getElementById(id).value='');
-document.getElementById('tEmoji').value='🎯';
-document.getElementById('tDanaDarurat').checked=false;
-document.getElementById('tDanaDaruratHint').style.display='none';
-populateAccFilters();
-document.getElementById('tAcc').value='';
-document.getElementById('tSavedWrap').style.display='block';
-openModal('targetModal');
-}
-function onTargetAccChange(){
-const linked=!!document.getElementById('tAcc').value;
-document.getElementById('tSavedWrap').style.display=linked?'none':'block';
-}
-function onTargetDanaDaruratToggle(){
-const chk=document.getElementById('tDanaDarurat');
-const hint=document.getElementById('tDanaDaruratHint');
-if(!chk.checked){hint.style.display='none';return;}
-const avgBulanan=(typeof FI!=='undefined')?FI.annualExpense()/12:0;
-const rekom=Math.round((avgBulanan||0)*6);
-if(!document.getElementById('tName').value.trim())document.getElementById('tName').value='Dana Darurat';
-const emojiEl=document.getElementById('tEmoji');
-if(!emojiEl.value.trim()||emojiEl.value==='🎯')emojiEl.value='🚨';
-if(!document.getElementById('tAmt').value&&rekom>0)document.getElementById('tAmt').value=rekom;
-const already=(D.targets||[]).find(t=>t.isDanaDarurat);
-let html=avgBulanan>0
-?`💡 Rekomendasi umum: <b>6× rata-rata pengeluaran bulanan</b> (≈${fmtFull(avgBulanan)}) = <b>${fmtFull(rekom)}</b>. Sudah diisi otomatis di kolom Target — sesuaikan lagi kalau perlu (kalau pemasukan gak tetap, biasanya lebih aman ke arah 9–12×).`
-:`💡 Rekomendasi umum dana darurat: 3–6× pengeluaran bulanan (lebih aman 6–12× kalau pemasukan gak tetap). Belum cukup data transaksi utk hitung otomatis, isi manual dulu ya.`;
-if(already)html+=`<br>⚠️ Target "<b>${escapeHtml(already.name)}</b>" saat ini juga ditandai Dana Darurat — kalau disimpan, tandanya pindah ke target ini.`;
-hint.innerHTML=html;
-hint.style.display='block';
-}
+// Catatan: fungsi-fungsi form BBM (populateTxBbmVehicleSelect, toggleTxBbmFields,
+// syncTxBbmAmt, syncTxAmtToLiter, syncTxAmtToLiterForce, recordBbmLog,
+// applyTxBbmFromTx) dipindah ke tx-bbm.js (lihat CLAUDE.md catatan kerja "split
+// transaksi.js" bagian ke-6) -- tetap global, tetap dipanggil persis sama dari
+// sini, dari HTML (modals.js), maupun dari file lain (BBM._saveInner di
+// features-budget-laporan-carnotes-pelanggan.js).
+// Catatan: fungsi-fungsi panel "Tambah ke Stok Sparepart" (populateTxStockSelect,
+// onTxStockItemChange, toggleTxStockFields, applyTxStockFromTx) dipindah ke
+// tx-stok-sparepart.js (lihat CLAUDE.md catatan kerja "split transaksi.js"
+// bagian ke-7) -- tetap global, tetap dipanggil persis sama dari sini, dari
+// HTML (modals.js), maupun dari scan-ocr.js.
+// Catatan: fungsi-fungsi domain Target/Tabungan (openTargetModal,
+// onTargetAccChange, onTargetDanaDaruratToggle, saveTarget,
+// showTargetAccountTx, addTarget, delTarget) dipindah ke tx-target.js
+// (lihat CLAUDE.md catatan kerja "split transaksi.js" bagian ke-9) --
+// tetap fungsi global, tetap dipanggil persis sama dari HTML (modals.js,
+// modules-render.js), maupun dari modules-calc.js/aset.js.
 function openCatatan(type){curCatatan=type;document.getElementById('catatanTitle').textContent='Catatan Anak';document.getElementById('catatanDate').value=new Date().toISOString().split('T')[0];document.getElementById('catatanText').value='';openModal('catatanModal');}
 function openReminderModal(){['rTitle','rDesc'].forEach(id=>document.getElementById(id).value='');openModal('reminderModal');}
-function openTransferModal(){
-populateAccFilters();
-document.getElementById('trAmt').value='';
-document.getElementById('trNote').value='';
-document.getElementById('trDate').value=new Date().toISOString().split('T')[0];
-if(D.accounts.length>1) document.getElementById('trTo').selectedIndex=1;
-openModal('transferModal');
-}
-function saveTransfer(){
-const from=document.getElementById('trFrom').value;
-const to=document.getElementById('trTo').value;
-evalAmtExpr('trAmt');
-const amt=parseFloat(document.getElementById('trAmt').value);
-if(!amt||amt<=0){toast('⚠️ Masukkan jumlah valid');return;}
-if(from===to){toast('⚠️ Akun asal dan tujuan harus berbeda');return;}
-const date=document.getElementById('trDate').value;
-const note=document.getElementById('trNote').value||'Transfer';
-const fromAcc=D.accounts.find(a=>a.id===from), toAcc=D.accounts.find(a=>a.id===to);
-D.transactions.push({id:uid(),type:'transfer_out',amount:amt,category:'Transfer',note:`${note} → ${escapeHtml(toAcc.name)}`,date,accountId:from});
-D.transactions.push({id:uid(),type:'transfer_in',amount:amt,category:'Transfer',note:`${note} ← ${escapeHtml(fromAcc.name)}`,date,accountId:to});
-save();closeModal('transferModal');renderDashboard();renderKeuangan();toast('✅ Transfer berhasil');
-}
+// Catatan: openTransferModal/saveTransfer dipindah ke tx-transfer.js (lihat
+// CLAUDE.md catatan kerja "split transaksi.js") -- tetap fungsi global,
+// tetap dipanggil persis sama dari HTML (modals.js).
 function setPayMethod(m){
 curPayMethod=m;
 ['pmTunai','pmCicilan','pmLangganan'].forEach(id=>{
@@ -422,101 +256,11 @@ document.getElementById('txCicilanPanel').style.display = m==='cicilan'?'block':
 document.getElementById('txLanggananPanel').style.display = m==='langganan'?'block':'none';
 if(m==='cicilan'){syncCicilanDate('date');syncCicilanPreview();}
 }
-function validateCicilanFields(){
-const totalEl=document.getElementById('txCicilanTotal');
-const tenorEl=document.getElementById('txCicilanTenor');
-const bungaEl=document.getElementById('txCicilanBunga');
-const total=parseFloat(totalEl.value);
-const tenor=parseInt(tenorEl.value);
-const bungaRaw=bungaEl.value.trim();
-const bunga=bungaRaw===''?0:parseFloat(bungaRaw);
-if(!totalEl.value.trim()||isNaN(total)||total<=0){toast('⚠️ Total harga cicilan harus lebih dari 0');totalEl.focus();return false;}
-if(isNaN(tenor)||tenor<=0){toast('⚠️ Tenor cicilan tidak valid');return false;}
-if(isNaN(bunga)||bunga<0){toast('⚠️ Bunga/biaya cicilan tidak boleh negatif');bungaEl.focus();return false;}
-return true;
-}
-// Logika hitung murni (tanpa sentuh DOM) -- dipakai oleh syncCicilanPreview() di bawah
-// DAN oleh self-test (lihat features-sheets-pwa-selftest.js), supaya self-test cukup panggil fungsi
-// ini langsung tanpa perlu buka txModal asli / mengganggu form yang sedang diisi user.
-function calcCicilanPerBulanFromTotal(hargaPokok,tenor,bungaPct){
-const totalBayar=hargaPokok*(1+bungaPct/100);
-return{perBulan:Math.ceil(totalBayar/tenor),totalBayar};
-}
-function calcCicilanTotalFromPerBulan(perBulan,tenor,bungaPct){
-const totalBayar=perBulan*tenor;
-return{hargaPokok:Math.round(totalBayar/(1+bungaPct/100)),totalBayar};
-}
-function syncCicilanPreview(src){
-if(src==='total'||src==='perbulan') cicilanLastInput=src;
-if(src==='sharedPct'||src==='sharedNominal') cicilanSharedLastInput=src==='sharedPct'?'pct':'nominal';
-const totalEl=document.getElementById('txCicilanTotal');
-const perBulanEl=document.getElementById('txCicilanPerBulan');
-const tenor=parseInt(document.getElementById('txCicilanTenor').value)||6;
-const bunga=parseFloat(document.getElementById('txCicilanBunga').value)||0;
-const prev=document.getElementById('txCicilanPreview');
-let totalBayar, perBulan, hargaPokok;
-if(cicilanLastInput==='perbulan'){
-perBulan=parseFloat(perBulanEl.value)||0;
-if(!perBulan||perBulan<=0){prev.style.display='none';document.getElementById('txAmt').value='';totalEl.value='';return;}
-({hargaPokok,totalBayar}=calcCicilanTotalFromPerBulan(perBulan,tenor,bunga));
-totalEl.value=hargaPokok;
-} else {
-hargaPokok=parseFloat(totalEl.value)||0;
-if(!hargaPokok||hargaPokok<=0){prev.style.display='none';document.getElementById('txAmt').value='';perBulanEl.value='';return;}
-({perBulan,totalBayar}=calcCicilanPerBulanFromTotal(hargaPokok,tenor,bunga));
-perBulanEl.value=perBulan;
-}
-const sisaTenor=tenor-1;
-document.getElementById('prevPerBulan').textContent=fmtFull(perBulan);
-document.getElementById('prevTotal').textContent=fmtFull(totalBayar);
-document.getElementById('prevSisa').textContent=sisaTenor>0?`${sisaTenor}x lagi (${fmtFull(perBulan*sisaTenor)})`: 'Lunas setelah ini';
-prev.style.display='block';
-const mineWrap=document.getElementById('prevMineRow');
-const sharedPrevEl=document.getElementById('txCicilanSharedPreview');
-const sh=getCicilanSharedMine(perBulan);
-let perBulanMine=perBulan;
-if(sh.shared){
-perBulanMine=sh.mine;
-if(cicilanSharedLastInput==='nominal'){document.getElementById('txCicilanSharedPct').value=sh.pct;}
-else{document.getElementById('txCicilanSharedNominal').value=sh.mine;}
-document.getElementById('prevPerBulanMine').textContent=fmtFull(perBulanMine);
-mineWrap.style.display='block';
-if(sharedPrevEl)sharedPrevEl.textContent=`👫 Porsi kamu: ${fmt(perBulanMine)}/bulan (${sh.pct}%) dari total ${fmt(perBulan)}/bulan (sisanya ${fmt(perBulan-perBulanMine)} ditanggung pihak lain)`;
-} else {
-mineWrap.style.display='none';
-if(sharedPrevEl)sharedPrevEl.textContent='';
-}
-document.getElementById('txAmt').value=perBulanMine;
-}
-function getCicilanSharedMine(perBulanFull){
-const chk=document.getElementById('txCicilanShared');
-const shared=chk&&chk.checked;
-if(!shared)return{shared:false,pct:null,mine:perBulanFull};
-let pct,mine;
-if(cicilanSharedLastInput==='nominal'){
-mine=parseFloat(document.getElementById('txCicilanSharedNominal').value)||0;
-mine=Math.min(Math.max(mine,0),perBulanFull);
-pct=perBulanFull>0?Math.min(99,Math.max(1,Math.round((mine/perBulanFull*100)*10)/10)):50;
-} else {
-pct=Math.min(99,Math.max(1,parseFloat(document.getElementById('txCicilanSharedPct').value)||50));
-mine=Math.round(perBulanFull*pct/100);
-}
-return{shared:true,pct,mine};
-}
-function toggleCicilanSharedFields(){
-const shared=document.getElementById('txCicilanShared').checked;
-document.getElementById('txCicilanSharedWrap').style.display=shared?'block':'none';
-if(shared) cicilanSharedLastInput='pct';
-syncCicilanPreview();
-}
-function syncCicilanDate(src){
-if(curPayMethod!=='cicilan'||cicilanDateLinked)return;
-const dateEl=document.getElementById('txDate');
-const dueEl=document.getElementById('txCicilanDue');
-if(!dateEl.value&&!dueEl.value)return;
-if(src==='date') dueEl.value=dateEl.value;
-else dateEl.value=dueEl.value;
-}
+// Catatan: fungsi-fungsi cicilan (validateCicilanFields, calcCicilanPerBulanFromTotal,
+// calcCicilanTotalFromPerBulan, syncCicilanPreview, getCicilanSharedMine,
+// toggleCicilanSharedFields, syncCicilanDate, openCicilanHistoryFromTx) dipindah ke
+// cicilan.js (lihat CLAUDE.md catatan kerja "split transaksi.js") -- tetap global
+// (bukan module), tetap dipanggil persis sama dari sini & dari HTML (modals.js).
 function openTxModal(type){
 txEditId=null;
 if(typeof WorthIt!=='undefined')WorthIt.pendingBuyId=null;
@@ -710,11 +454,6 @@ setPayMethod('tunai');
 }
 openModal('txModal');
 }
-function openCicilanHistoryFromTx(){
-if(!txEditLinkedBillId)return;
-closeModal('txModal');
-openBillHistory(txEditLinkedBillId);
-}
 function deleteTxFromModal(){
 if(!txEditId)return;
 const id=txEditId;
@@ -789,8 +528,22 @@ renderProductList();renderCobek();renderCobekRecent();
 }
 }
 if(existingBill && curPayMethod===existingBill.kind){
+// BUGFIX: D.bills entry (existingBill) is SHARED oleh SEMUA transaksi pembayaran cicilan/
+// langganan yang sudah tercatat (semuanya punya billLinkId yang sama ke bill ini) — bill
+// ini merepresentasikan JADWAL/SISA cicilan yang LIVE (dipakai buat hitung pembayaran
+// BERIKUTNYA), bukan snapshot transaksi tertentu. Sebelum fix ini, mengedit transaksi
+// cicilan LAMA (yg sudah lewat/histori, misal cuma mau betulin kategori bulan lalu) ikut
+// menimpa total harga/tenor/bunga/jatuh tempo/KATEGORI bill secara diam-diam — akibatnya
+// SEMUA cicilan berikutnya yang belum dibayar ikut berubah kategorinya tanpa disadari.
+// Fix: field jadwal (total/tenor/bunga/jatuh tempo/kategori/akun bill) hanya boleh
+// disinkron ke bill kalau transaksi yang diedit adalah transaksi TERBARU yang tertaut ke
+// bill ini (id transaksi terbesar). Kalau bukan (transaksi lama), cuma catatan transaksi
+// itu sendiri yang diubah — jadwal cicilan/langganan tidak ikut tersentuh.
+const linkedTxIds=D.transactions.filter(t=>t.billLinkId===existingBill.id).map(t=>t.id);
+const isLatestInstallment=linkedTxIds.length===0||existingTx.id>=Math.max(...linkedTxIds);
 if(curPayMethod==='cicilan'){
 const nama=document.getElementById('txCicilanNama').value.trim()||cat;
+if(isLatestInstallment){
 const total=parseFloat(document.getElementById('txCicilanTotal').value)||amt;
 const tenor=parseInt(document.getElementById('txCicilanTenor').value)||6;
 const bunga=parseFloat(document.getElementById('txCicilanBunga').value)||0;
@@ -804,17 +557,26 @@ const perBulanMine=sh.mine;
 Object.assign(existingBill,{name:nama,amount:perBulanMine,nextDue:due,category:cat,accountId:accId,note,totalHarga:total,tenor,bunga,shared:cicilanShared,sharedPct:cicilanSharedPct,totalAmount:cicilanShared?total:null});
 Object.assign(existingTx,{amount:perBulanMine,category:cat,subcategory:subCat,accountId:accId,date,note:nama+(note?' - '+note:'')});
 } else {
+Object.assign(existingTx,{category:cat,subcategory:subCat,accountId:accId,date,note:nama+(note?' - '+note:'')});
+toast('ℹ️ Ini pembayaran cicilan lama — hanya catatan transaksi ini yang diubah. Jadwal cicilan (total/tenor/jatuh tempo) tidak ikut berubah, ubah lewat 📋 Riwayat Pembayaran kalau perlu.');
+}
+} else {
 const nama=document.getElementById('txLanggananNama').value.trim()||cat;
+if(isLatestInstallment){
 const freq=document.getElementById('txLanggananFreq').value;
 const due=document.getElementById('txLanggananDue').value||date;
 Object.assign(existingBill,{name:nama,amount:amt,freq,nextDue:due,category:cat,accountId:accId,note});
 Object.assign(existingTx,{amount:amt,category:cat,subcategory:subCat,accountId:accId,date,note:nama+(note?' - '+note:'')});
+} else {
+Object.assign(existingTx,{amount:amt,category:cat,subcategory:subCat,accountId:accId,date,note:nama+(note?' - '+note:'')});
+toast('ℹ️ Ini pembayaran tagihan lama — hanya catatan transaksi ini yang diubah, jadwal tagihan tidak ikut berubah.');
+}
 }
 txEditId=null;
 rememberLastAccForCat(cat,accId);
 if(_txCatLearnSource){learnCatFromItemName(_txCatLearnSource,cat);_txCatLearnSource=null;}
 save();closeModal('txModal');renderDashboard();renderKeuangan();renderBillList();checkBills();
-toast('✅ Cicilan/tagihan diperbarui');
+if(isLatestInstallment)toast('✅ Cicilan/tagihan diperbarui');
 return;
 }
 if(curPayMethod==='cicilan'){
@@ -882,6 +644,21 @@ if(existingTx.servisLinkId&&D.servisLogs){
 const linkedServis=D.servisLogs.find(s=>s.id===existingTx.servisLinkId);
 if(linkedServis)Object.assign(linkedServis,{cost:amt,date,accountId:accId});
 }
+// BUGFIX: dulu catatan BBM terkait cuma disinkron kalau checkbox "Sinkron
+// ke Catatan Mobil" masih tercentang saat simpan (lihat applyTxBbmFromTx
+// di bawah, yg early-return kalau checkbox mati/panel BBM disembunyikan
+// mis. krn kategori diganti keluar dari BBM). Kalau user ubah jumlah/
+// tanggal transaksi TAPI checkbox itu kebetulan mati, D.bbmLogs jadi basi
+// (beda dgn amount/date transaksi) — Keuangan & Car Notes jadi tidak
+// konsisten, padahal `bbmLinkId` masih menghubungkan keduanya. Field dasar
+// (cost/date/accountId) sekarang SELALU disinkron tanpa syarat begitu ada
+// link, persis pola `servisLinkId` di atas -- checkbox tetap cuma
+// mengatur field detail BBM (km/liter/harga/spbu/fullTank/kendaraan) lewat
+// applyTxBbmFromTx di bawah, bukan field dasar ini.
+if(existingTx.bbmLinkId&&D.bbmLogs){
+const linkedBbm=D.bbmLogs.find(b=>b.id===existingTx.bbmLinkId);
+if(linkedBbm)Object.assign(linkedBbm,{cost:amt,date,accountId:accId});
+}
 if(existingTx.renovItemLinkId){
 Renov.onLinkedTxEdited(existingTx);
 }
@@ -913,30 +690,6 @@ rememberLastAccForCat(cat,accId);
 if(_txCatLearnSource){learnCatFromItemName(_txCatLearnSource,cat);_txCatLearnSource=null;}
 save();closeModal('txModal');renderDashboard();renderKeuangan();renderCnTab();toast(existingTx?'✅ Transaksi diperbarui':'✅ Transaksi tersimpan');
 }
-function setKeuanganTab(t,el){
-document.querySelectorAll('#page-keuangan .cn-tab').forEach(b=>b.classList.remove('active'));
-if(el) el.classList.add('active');
-else { const btn=document.querySelectorAll('#page-keuangan .cn-tab')[t==='laporan'?1:0]; if(btn) btn.classList.add('active'); }
-document.getElementById('keuanganTab-kelola').classList.toggle('u-dnone', t!=='kelola');
-document.getElementById('keuanganTab-kelola').style.display='';
-document.getElementById('keuanganTab-laporan').classList.toggle('u-dnone', t!=='laporan');
-document.getElementById('keuanganTab-laporan').style.display='';
-if(t==='kelola'){populateKeuFilters();loadKeuFilterPrefsIntoDOM();renderKeuangan();renderBillList();}
-if(t==='laporan'){populateCatFilter();populateAccFilters();renderLaporan();}
-}
-function saveTarget(){
-const name=document.getElementById('tName').value;
-const amt=parseFloat(document.getElementById('tAmt').value);
-if(!name||!amt){toast('⚠️ Isi nama dan target');return;}
-const accId=document.getElementById('tAcc').value||null;
-const saved=accId?0:(parseFloat(document.getElementById('tSaved').value)||0);
-const isDanaDarurat=document.getElementById('tDanaDarurat').checked;
-if(isDanaDarurat)D.targets.forEach(t=>{t.isDanaDarurat=false;});
-D.targets.push({id:uid(),name,amount:amt,saved,accountId:accId,emoji:document.getElementById('tEmoji').value||'🎯',isDanaDarurat});
-save();closeModal('targetModal');renderSettings();
-if(typeof AlokasiAset!=='undefined')AlokasiAset.renderAll();
-toast(accId?'✅ Target tersimpan, tersambung ke akun (otomatis update)':'✅ Target tersimpan');
-}
 function saveCatatan(){
 const text=document.getElementById('catatanText').value;
 if(!text){toast('⚠️ Tulis catatan dulu');return;}
@@ -952,160 +705,25 @@ save();closeModal('reminderModal');renderSettings();toast('✅ Pengingat tersimp
 }
 function saveLDR(){D.nextPulang=document.getElementById('nextPulang').value;D.ldrCycleStart=new Date().toISOString().slice(0,10);save();renderLDR();}
 
-// (v94): toggleMs/showTargetAccountTx/addTarget/delTarget/delReminder dipindah dari
-// backup-restore.js (skrg backup-restore.js) — domain Target/Milestone/
-// Reminder di Pengaturan, gabung bareng saveTarget/saveCatatan/saveReminder/saveLDR di atas yang sudah
-// lebih dulu ada di sini sejak v83.
+// (v94): toggleMs/delReminder dipindah dari backup-restore.js — domain
+// Milestone/Reminder di Pengaturan, gabung bareng saveCatatan/saveReminder/
+// saveLDR di atas yang sudah lebih dulu ada di sini sejak v83.
+// (showTargetAccountTx/addTarget/delTarget, juga awalnya gabung di sini,
+// sudah dipindah lagi ke tx-target.js -- lihat catatan di atas openCatatan.)
 function toggleMs(i){D.milestones[i]=!D.milestones[i];save();renderMs();}
 /* moved to modules-render.js: renderMs */
 /* moved to modules-render.js: renderTarget */
-function showTargetAccountTx(targetId){
-const t=D.targets.find(x=>sameId(x.id,targetId));if(!t||!t.accountId)return;
-const acc=D.accounts.find(a=>a.id===t.accountId);if(!acc)return;
-const txs=D.transactions.filter(x=>x.accountId===acc.id).sort((a,b)=>new Date(b.date)-new Date(a.date));
-const bal=recalcAccBalance(acc.id);
-document.getElementById('filterTxTitle').textContent=`${t.emoji} ${t.name} (${acc.emoji} ${acc.name})`;
-document.getElementById('filterTxSummary').textContent=`${txs.length} transaksi · Saldo saat ini ${fmtFull(bal)} dari target ${fmtFull(t.amount)}`;
-document.getElementById('filterTxList').innerHTML=txs.length?txs.slice(0,100).map(txHTML).join(''):'<div class="empty"><div class="empty-icon">💸</div><div class="empty-text">Belum ada transaksi di akun ini</div></div>';
-openModal('filterTxModal');
-}
-async function addTarget(i){const addStr=await showPromptModal({title:'Tambah Tabungan',message:'Tambah berapa? (Rp)',icon:'🎯',inputType:'number'});if(addStr===null)return;const add=parseFloat(addStr);if(!add||isNaN(add))return;D.targets[i].saved+=add;save();renderSettings();toast('✅ Target diperbarui');}
-async function delTarget(i){if(!await askConfirm('Hapus target?'))return;D.targets.splice(i,1);save();renderSettings();toast('🗑 Target dihapus');}
 /* moved to modules-render.js: renderReminder */
 function delReminder(i){D.reminders.splice(i,1);save();renderSettings();}
 
-// --- List Transaksi (kartu tx, hapus tx) & filter periode Keuangan/Laporan + Cashflow Forecast ---
-// (v92): dipindah dari backup-restore.js — domainnya sama-sama seputar
-// data transaksi (render kartu tx, hapus tx, filter rentang tanggal utk Keuangan/Laporan, proyeksi cashflow).
+// --- List Transaksi (kartu tx, hapus tx) & filter periode Keuangan/Laporan
+// + Cashflow Forecast: dipindah ke tx-list-cashflow.js (lihat CLAUDE.md
+// catatan kerja "split transaksi.js" bagian ke-11) -- txHTML, delTx,
+// changeMonth, txListPeriode, setTxListPeriode, getTxListRange, setPeriode,
+// getRange, computeCashflowForecast, setKeuanganTab semuanya di sana
+// sekarang, fungsi global verbatim, tetap dipanggil sama persis dari sini.
 /* moved to modules-render.js: renderDashDanaDarurat */
-function txHTML(t){
-const cats=getAllCats();
-let icon='💰', bg='var(--accent-soft)';
-if(t.type==='transfer_out'||t.type==='transfer_in'){icon='⇄';bg='var(--accent-soft)';}
-else { const cat=cats.find(c=>c.name===t.category); if(cat){icon=cat.emoji;} bg=t.type==='income'?'var(--accent3-soft)':'var(--accent2-soft)'; }
-const sign=(t.type==='income'||t.type==='transfer_in')?'+':'-';
-const cls=(t.type==='income'||t.type==='transfer_in')?'green':'red';
-const acc=D.accounts.find(a=>a.id===t.accountId);
-const subText=t.subcategory?(' · '+t.subcategory):'';
-const pmIcons={cicilan:'💳',langganan:'🔁',tunai:''};
-const pmBadge=(t.payMethod&&t.payMethod!=='tunai')?` <span class="acc-chip">${pmIcons[t.payMethod]||''} ${t.payMethod}</span>`:'';
-return`<div class="tx-item u-pointer" data-action="editTx" data-args="${escapeHtml(JSON.stringify([t.id]))}">
-    <div class="tx-icon" style="background:${bg}">${icon}</div>
-    <div class="tx-info"><div class="tx-name">${escapeHtml(t.category)}${escapeHtml(subText)}</div><div class="tx-meta">${t.date}${t.note?' · '+escapeHtml(t.note):''}${acc?` <span class="acc-chip">${acc.emoji} ${escapeHtml(acc.name)}</span>`:''}${pmBadge}</div></div>
-    <div class="u-flex u-aic u-gap6">
-      <div class="tx-amount ${cls}">${sign}${fmt(t.amount)}</div>
-      <button class="tx-del" data-stop="1" data-action="delTx" data-args="${escapeHtml(JSON.stringify([t.id]))}" aria-label="Hapus">🗑</button>
-    </div>
-  </div>`;
-}
-async function delTx(id){
-if(!await askConfirm('Hapus transaksi ini?'))return;
-const t=D.transactions.find(x=>x.id===id);
-if(t&&t.bbmLinkId&&D.bbmLogs)D.bbmLogs=D.bbmLogs.filter(b=>b.id!==t.bbmLinkId);
-if(t&&t.stockItems&&t.stockItems.length){
-t.stockItems.forEach(si=>{
-const p=D.products.find(x=>x.id===si.productId);
-if(p)p.stock=Math.max(0,(p.stock||0)-(si.qty||0));
-});
-toast(`📦 Stok dikurangi (transaksi dihapus)`,2600);
-} else if(t&&t.stockProductId){
-const p=D.products.find(x=>x.id===t.stockProductId);
-if(p){p.stock=Math.max(0,(p.stock||0)-(t.stockQty||0));toast(`📦 Stok "${p.name}" dikurangi ${t.stockQty} (transaksi dihapus)`,2600);}
-}
-if(t&&t.cobekLinkId){
-const linkedCobek=D.cobek.find(c=>c.id===t.cobekLinkId);
-if(linkedCobek&&linkedCobek.items){
-linkedCobek.items.forEach(it=>{const p=D.products.find(x=>x.id===it.productId);if(p)p.stock=(p.stock||0)+it.qty;});
-toast(`🪨 Stok dikembalikan, penjualan Shop terkait dihapus`,2600);
-}
-D.cobek=D.cobek.filter(c=>c.id!==t.cobekLinkId);
-renderCobek();renderCobekRecent();
-}
-if(t&&t.servisLinkId&&D.servisLogs){
-const linkedServis=D.servisLogs.find(s=>s.id===t.servisLinkId);
-if(linkedServis){
-if(linkedServis.usedPartId)revertStockUsage(linkedServis.usedPartId,linkedServis.usedPartQty);
-toast(`🔧 Catatan servis terkait ikut dihapus`,2600);
-}
-D.servisLogs=D.servisLogs.filter(s=>s.id!==t.servisLinkId);
-renderStockList();
-}
-if(t&&t.renovItemLinkId){
-Renov.onLinkedTxDeleted(t);
-}
-if(t&&t.wishlistLinkId){
-WorthIt.onLinkedTxDeleted(t);
-}
-if(t&&t.sewaKiosLinkId){
-SewaKios.onLinkedTxDeleted(t);
-}
-if(t&&t.tukangPaymentEntryIds&&t.tukangPaymentEntryIds.length){
-Tukang.unmarkPaidEntries(t.tukangPaymentEntryIds);
-}
-D.transactions=D.transactions.filter(t=>t.id!==id);
-save();renderDashboard();renderKeuangan();renderCnTab();renderProductList();
-if(!t||(!t.stockProductId&&!t.cobekLinkId&&!t.servisLinkId&&!(t.stockItems&&t.stockItems.length)))toast('🗑 Dihapus'+(t&&t.renovItemLinkId?' (status lunas di Proyek Renovasi dibatalkan)':(t&&t.wishlistLinkId?' (barang dikembalikan ke Prioritas Belanja)':(t&&t.tukangPaymentEntryIds&&t.tukangPaymentEntryIds.length?' (absensi tukang terkait dibuka kembali)':''))));
-}
-function changeMonth(dir){
-curMonth+=dir;
-if(curMonth>11){curMonth=0;curYear++;}
-if(curMonth<0){curMonth=11;curYear--;}
-closeModal('filterTxModal');
-txListPage=1;
-renderKeuangan();
-}
-let txListPeriode='bulan';
-function setTxListPeriode(p,el){
-txListPeriode=p;
-document.querySelectorAll('#txListPeriodeChips .chip-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');
-document.getElementById('txListCustomRange').classList.toggle('u-dnone', p!=='custom');
-document.getElementById('txListCustomRange').style.display='';
-resetTxPageAndRender();
-}
-function getTxListRange(){
-if(txListPeriode==='selamanya')return{from:new Date(0),to:new Date(8640000000000000)};
-const now=new Date();now.setHours(23,59,59,999);let from;
-if(txListPeriode==='hari'){from=new Date();from.setHours(0,0,0,0);}
-else if(txListPeriode==='minggu'){from=new Date();from.setDate(from.getDate()-from.getDay());from.setHours(0,0,0,0);}
-else if(txListPeriode==='bulan'){from=new Date(curYear,curMonth,1);const to2=new Date(curYear,curMonth+1,0);to2.setHours(23,59,59,999);return{from,to:to2};}
-else if(txListPeriode==='tahun'){from=new Date(now.getFullYear(),0,1);}
-else{const f=document.getElementById('txListFrom').value,t2=document.getElementById('txListTo').value;return{from:f?new Date(f):new Date(0),to:t2?new Date(t2+'T23:59:59'):now};}
-return{from,to:now};
-}
 /* moved to modules-render.js: renderKeuangan */
 /* moved to modules-render.js: renderBudgets */
 /* moved to modules-render.js: renderBudgetCatOptions */
-function setPeriode(p,el){
-filterPeriode=p;
-document.querySelectorAll('#periodeChips .chip-btn').forEach(b=>b.classList.remove('active'));
-if(el&&el.classList)el.classList.add('active');
-document.getElementById('customRange').classList.toggle('u-dnone', p!=='custom');
-document.getElementById('customRange').style.display='';
-renderLaporan();
-}
-function getRange(){
-if(filterPeriode==='selamanya')return{from:new Date(0),to:new Date(8640000000000000)};
-const now=new Date();now.setHours(23,59,59,999);let from;
-if(filterPeriode==='hari'){from=new Date();from.setHours(0,0,0,0);}
-else if(filterPeriode==='minggu'){from=new Date();from.setDate(from.getDate()-from.getDay());from.setHours(0,0,0,0);}
-else if(filterPeriode==='bulan'){from=new Date(now.getFullYear(),now.getMonth(),1);}
-else if(filterPeriode==='tahun'){from=new Date(now.getFullYear(),0,1);}
-else{const f=document.getElementById('fFrom').value,t2=document.getElementById('fTo').value;return{from:f?new Date(f):new Date(0),to:t2?new Date(t2+'T23:59:59'):now};}
-return{from,to:now};
-}
-function computeCashflowForecast(){
-const avail=(typeof BudgetReko!=='undefined')?BudgetReko.monthsAvailable():0;
-const months=(typeof BudgetReko!=='undefined')?BudgetReko.effectiveMonths():3;
-const from=(typeof BudgetReko!=='undefined')?BudgetReko.rangeFrom():(()=>{const n=new Date();return new Date(n.getFullYear(),n.getMonth()-2,1);})();
-const now=new Date();
-const txs=(D.transactions||[]).filter(t=>{const d=new Date(t.date);return d>=from&&d<=now;});
-const incAvg=txs.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0)/months;
-const expAvg=txs.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0)/months;
-const saldoNow=totalSaldoAkun();
-const in30=new Date(now);in30.setDate(in30.getDate()+30);
-const upcoming=(D.bills||[]).filter(b=>{const d=new Date(b.nextDue);return d>=now&&d<=in30;});
-const billsDue=upcoming.reduce((s,b)=>s+b.amount,0);
-const projected=saldoNow+incAvg-expAvg-billsDue;
-return{incAvg,expAvg,saldoNow,billsDue,upcoming,projected,months,avail};
-}
 /* moved to modules-render.js: renderCashflowForecast */
