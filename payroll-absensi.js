@@ -32,6 +32,7 @@ const whIstSelesaiEl=document.getElementById('whIstSelesai'); if(whIstSelesaiEl)
 const whBorTotalEl=document.getElementById('whBorTotal'); if(whBorTotalEl)whBorTotalEl.value='';
 const whBorNoteEl=document.getElementById('whBorNote'); if(whBorNoteEl)whBorNoteEl.value='';
 const whPotonganEl=document.getElementById('whPotongan'); if(whPotonganEl)whPotonganEl.value='';
+const whTambahanEl=document.getElementById('whTambahan'); if(whTambahanEl)whTambahanEl.value='';
 document.getElementById('whJenisHari').value='biasa';
 Payroll.onJenisHariChange();
 const targetEl=document.getElementById('pyTargetBulanan');
@@ -77,13 +78,15 @@ const borTotal=parsePzNum(document.getElementById('whBorTotal').value);
 if(!borTotal||borTotal<=0){toast('⚠️ Isi total upah borongan/trip');return;}
 const potonganEl=document.getElementById('whPotongan');
 const potongan=potonganEl?(parsePzNum(potonganEl.value)||0):0;
-const total=Math.max(0,Math.round(borTotal)-potongan);
+const tambahanEl=document.getElementById('whTambahan');
+const tambahan=tambahanEl?(parsePzNum(tambahanEl.value)||0):0;
+const total=Math.max(0,Math.round(borTotal)+tambahan-potongan);
 if(Payroll.editId!==null){
 D.workDays=D.workDays.filter(w=>w.id!==Payroll.editId&&w.date!==date);
 } else {
 D.workDays=D.workDays.filter(w=>w.date!==date);
 }
-D.workDays.push({id:Payroll.editId!==null?Payroll.editId:uid(),date,masuk:'',pulang:'',istMulai:'',istSelesai:'',istirahatMin:0,totalJam:0,jamLembur:0,jenis,pokok:Math.round(borTotal),lembur:0,potongan,total,borNote,gajiHariInput:null});
+D.workDays.push({id:Payroll.editId!==null?Payroll.editId:uid(),date,masuk:'',pulang:'',istMulai:'',istSelesai:'',istirahatMin:0,totalJam:0,jamLembur:0,jenis,pokok:Math.round(borTotal),lembur:0,potongan,tambahan,total,borNote,gajiHariInput:null});
 const wasEdit=Payroll.editId!==null;
 Payroll.cancelEditWorkDay();
 save();Payroll.renderWorkDays();toast(wasEdit?'✅ Absensi diperbarui: '+fmtFull(total):'✅ Absensi borongan tersimpan: '+fmtFull(total));
@@ -116,13 +119,15 @@ const upahLemburPerJam=gajiHari/7*lemburMx;
 const lembur=jenis==='minggu'?0:jamLembur*upahLemburPerJam;
 const potonganEl=document.getElementById('whPotongan');
 const potongan=potonganEl?(parsePzNum(potonganEl.value)||0):0;
-const total=Math.max(0,pokok+lembur-potongan);
+const tambahanEl=document.getElementById('whTambahan');
+const tambahan=tambahanEl?(parsePzNum(tambahanEl.value)||0):0;
+const total=Math.max(0,pokok+lembur+tambahan-potongan);
 if(Payroll.editId!==null){
 D.workDays=D.workDays.filter(w=>w.id!==Payroll.editId&&w.date!==date);
 } else {
 D.workDays=D.workDays.filter(w=>w.date!==date);
 }
-D.workDays.push({id:Payroll.editId!==null?Payroll.editId:uid(),date,masuk,pulang,istMulai:istMulaiStr,istSelesai:istSelesaiStr,istirahatMin,totalJam:Math.round(totalJam*100)/100,jamLembur:Math.round(jamLembur*100)/100,jenis,pokok,lembur:Math.round(lembur),potongan,total:Math.round(total),gajiHariInput:gajiHari,borNote:''});
+D.workDays.push({id:Payroll.editId!==null?Payroll.editId:uid(),date,masuk,pulang,istMulai:istMulaiStr,istSelesai:istSelesaiStr,istirahatMin,totalJam:Math.round(totalJam*100)/100,jamLembur:Math.round(jamLembur*100)/100,jenis,pokok,lembur:Math.round(lembur),potongan,tambahan,total:Math.round(total),gajiHariInput:gajiHari,borNote:''});
 const wasEdit=Payroll.editId!==null;
 Payroll.cancelEditWorkDay();
 save();Payroll.renderWorkDays();toast(wasEdit?'✅ Absensi diperbarui: '+fmtFull(total):'✅ Absensi tersimpan: '+fmtFull(total));
@@ -144,6 +149,7 @@ document.getElementById('whGaji').value=(w.gajiHariInput!=null?w.gajiHariInput:w
 const whBorTotalEl=document.getElementById('whBorTotal'); if(whBorTotalEl)whBorTotalEl.value=w.jenis==='borongan'?w.pokok:'';
 const whBorNoteEl=document.getElementById('whBorNote'); if(whBorNoteEl)whBorNoteEl.value=w.borNote||'';
 const whPotonganEl=document.getElementById('whPotongan'); if(whPotonganEl)whPotonganEl.value=w.potongan||'';
+const whTambahanEl=document.getElementById('whTambahan'); if(whTambahanEl)whTambahanEl.value=w.tambahan||'';
 Payroll.onJenisHariChange();
 document.getElementById('whEditHint').style.display='block';
 document.getElementById('whEditDateLabel').textContent=new Date(w.date).toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short'});
@@ -163,6 +169,7 @@ document.getElementById('whJenisHari').value='biasa';
 const whBorTotalEl2=document.getElementById('whBorTotal'); if(whBorTotalEl2)whBorTotalEl2.value='';
 const whBorNoteEl2=document.getElementById('whBorNote'); if(whBorNoteEl2)whBorNoteEl2.value='';
 const whPotonganEl2=document.getElementById('whPotongan'); if(whPotonganEl2)whPotonganEl2.value='';
+const whTambahanEl2=document.getElementById('whTambahan'); if(whTambahanEl2)whTambahanEl2.value='';
 Payroll.onJenisHariChange();
 if(dateOverride){
 document.getElementById('whDate').value=dateOverride;
@@ -200,12 +207,13 @@ const total=thisWeek.reduce((s,w)=>s+w.total,0);
 const totalPokok=thisWeek.reduce((s,w)=>s+w.pokok,0);
 const totalLembur=thisWeek.reduce((s,w)=>s+w.lembur,0);
 const totalPotongan=thisWeek.reduce((s,w)=>s+(w.potongan||0),0);
+const totalTambahan=thisWeek.reduce((s,w)=>s+(w.tambahan||0),0);
 const resEl=document.getElementById('gajiResult');
 if(thisWeek.length){
 resEl.style.display='block';
 document.getElementById('whCount').textContent=thisWeek.length;
 document.getElementById('gajiTotal').textContent=fmtFull(total);
-document.getElementById('gajiDetail').innerHTML=`<div class="gaji-row"><span>Total gaji pokok</span><span>${fmtFull(totalPokok)}</span></div><div class="gaji-row"><span>Total lembur</span><span>${fmtFull(totalLembur)}</span></div>`+(totalPotongan>0?`<div class="gaji-row"><span>Total potongan lain-lain</span><span>−${fmtFull(totalPotongan)}</span></div>`:'');
+document.getElementById('gajiDetail').innerHTML=`<div class="gaji-row"><span>Total gaji pokok</span><span>${fmtFull(totalPokok)}</span></div><div class="gaji-row"><span>Total lembur</span><span>${fmtFull(totalLembur)}</span></div>`+(totalTambahan>0?`<div class="gaji-row"><span>Total tambahan lain-lain</span><span>+${fmtFull(totalTambahan)}</span></div>`:'')+(totalPotongan>0?`<div class="gaji-row"><span>Total potongan lain-lain</span><span>−${fmtFull(totalPotongan)}</span></div>`:'');
 const syncBoxEl=document.getElementById('gajiSyncBox');
 if(syncBoxEl){
 // BUGFIX: dulu tombol ini cuma tampil kalau isCurrentWeek true, jadi kalau
@@ -226,7 +234,7 @@ listEl.innerHTML=thisWeek.length?thisWeek.map(w=>`
       <div class="wh-day-item u-pointer" data-action="editWorkDay" data-args="${escapeHtml(JSON.stringify([w.id]))}">
         <div class="wh-day-info">
           <div class="wh-day-date">${new Date(w.date).toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short'})} ${w.jenis==='minggu'?'🔴':''}${w.jenis==='borongan'?'📦':''} <span class="u-fs10 u-t2 u-fw400">✏️</span></div>
-          <div class="wh-day-time">${w.jenis==='borongan'?'Borongan/Per-Trip'+(w.borNote?' · '+escapeHtml(w.borNote):''):w.masuk+'–'+w.pulang+' ('+w.totalJam+' jam'+(w.jamLembur>0?', lembur '+w.jamLembur+' jam':'')+')'}${w.potongan>0?' · potongan −'+fmtFull(w.potongan):''}</div>
+          <div class="wh-day-time">${w.jenis==='borongan'?'Borongan/Per-Trip'+(w.borNote?' · '+escapeHtml(w.borNote):''):w.masuk+'–'+w.pulang+' ('+w.totalJam+' jam'+(w.jamLembur>0?', lembur '+w.jamLembur+' jam':'')+')'}${w.tambahan>0?' · tambahan +'+fmtFull(w.tambahan):''}${w.potongan>0?' · potongan −'+fmtFull(w.potongan):''}</div>
         </div>
         <div class="wh-day-pay">${fmtFull(w.total)}</div>
         <button class="tx-del" data-stop="1" data-action="delWorkDay" data-args="${escapeHtml(JSON.stringify([w.id]))}" aria-label="Hapus">🗑</button>
@@ -368,12 +376,40 @@ const weeks=Object.values(byWeek).sort((a,b)=>a.weekStart.localeCompare(b.weekSt
 const total=weeks.reduce((s,w)=>s+w.total,0);
 return {weeks,total,weekCount:weeks.length};
 },
+// v180: notif ini dulu cuma teks (innerHTML) tanpa cara ditutup/dikonfirm sama sekali — user
+// terpaksa lihat warning yang sama terus tiap buka Absensi walau sudah paham & belum sempat
+// menindaklanjuti. Sekarang dipisah jadi "raw info" (pendingOldWeeksInfo, dipakai badge dashboard
+// — TIDAK ikut kefilter dismiss, supaya status asli tetap akurat) vs "visible info" (dipakai box
+// notif ini saja, ikut kefilter minggu yang sudah di-dismiss user lewat tombol ✕ di bawah).
+// Minggu yang di-dismiss disimpan per weekStart (D.payrollDismissedWeeks) supaya kalau nanti ada
+// minggu pending BARU yang menumpuk lagi, notif otomatis muncul lagi (bukan dismiss selamanya).
+pendingOldWeeksInfoVisible(){
+const info=Payroll.pendingOldWeeksInfo();
+if(!info)return null;
+const dismissed=new Set(D.payrollDismissedWeeks||[]);
+const weeks=info.weeks.filter(w=>!dismissed.has(w.weekStart));
+if(!weeks.length)return null;
+const total=weeks.reduce((s,w)=>s+w.total,0);
+return {weeks,total,weekCount:weeks.length};
+},
+dismissPendingOldWeeksBox(){
+const info=Payroll.pendingOldWeeksInfo();
+if(!info)return;
+const keys=info.weeks.map(w=>w.weekStart);
+D.payrollDismissedWeeks=Array.from(new Set([...(D.payrollDismissedWeeks||[]),...keys]));
+save();
+Payroll.renderPendingOldWeeksBox();
+toast('✅ Notif disembunyikan — tetap bisa dicek & digajikan lewat Riwayat Absensi kapan saja');
+},
 renderPendingOldWeeksBox(){
 const box=document.getElementById('whPendingOldWeeksBox');
 if(!box)return;
-const info=Payroll.pendingOldWeeksInfo();
+const info=Payroll.pendingOldWeeksInfoVisible();
 if(!info){box.innerHTML='';return;}
-box.innerHTML=`<div style="background:var(--accent4-soft);border:1px solid var(--accent4);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12px;line-height:1.5">⚠️ Ada absensi dari <b>${info.weekCount} minggu sebelumnya</b> yang belum di-reset/dicatat gajian (total ${fmtFull(info.total)}) — mungkin kelewat pas weekend. Cek Riwayat Absensi di bawah, lalu tap "💰 Sudah Gajian?" di Kalkulator Gaji buat tiap minggu yang belum.</div>`;
+box.innerHTML=`<div style="background:var(--accent4-soft);border:1px solid var(--accent4);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12px;line-height:1.5;position:relative">
+<button type="button" data-action="Payroll.dismissPendingOldWeeksBox" aria-label="Tutup notif" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text2);font-size:14px;cursor:pointer;padding:2px 6px;line-height:1">✕</button>
+<div style="padding-right:22px">⚠️ Ada absensi dari <b>${info.weekCount} minggu sebelumnya</b> yang belum di-reset/dicatat gajian (total ${fmtFull(info.total)}) — mungkin kelewat pas weekend. Cek Riwayat Absensi di bawah, lalu tap "💰 Sudah Gajian?" di Kalkulator Gaji buat tiap minggu yang belum.</div>
+</div>`;
 },
 renderDashMini(){
 const labelEl=document.getElementById('dashAbsensiStatusLabel');

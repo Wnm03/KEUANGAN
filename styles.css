@@ -124,6 +124,33 @@ details.card[open] summary::after{transform:rotate(180deg)}
 .tx-meta { font-size:var(--fs-label); color: var(--text2); margin-top: 1px; }
 .tx-amount { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; white-space: nowrap; }
 .tx-del { background: none; border: none; color: var(--text3); cursor: pointer; padding: 4px; font-size: 14px; flex-shrink: 0; }
+
+/* === Etalase Produk — kartu profesional (kw86-etalase-redesign) === */
+.shop-product-grid { display: flex; flex-direction: column; gap: 10px; }
+.shop-product-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 13px 14px 13px 17px; position: relative; overflow: hidden; }
+.shop-product-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent3); }
+.shop-product-card.stock-mid::before { background: var(--accent4); }
+.shop-product-card.stock-low::before { background: var(--accent2); }
+.shop-product-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.shop-product-name { font-size: 14px; font-weight: 700; line-height: 1.35; word-break: break-word; }
+.shop-product-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.shop-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: var(--r-pill); background: var(--surface3); color: var(--text2); white-space: nowrap; }
+.shop-tag.cat { background: var(--accent-soft); color: var(--accent); }
+.shop-stock-pill { font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: var(--r-pill); flex-shrink: 0; white-space: nowrap; }
+.shop-stock-pill.ok { background: var(--accent3-soft); color: var(--accent3); }
+.shop-stock-pill.mid { background: var(--accent4-soft); color: var(--accent4); }
+.shop-stock-pill.low { background: var(--accent2-soft); color: var(--accent2); }
+.shop-product-prices { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: 11px; padding-top: 11px; border-top: 1px dashed var(--border); }
+.shop-price-label { font-size: 9.5px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; font-weight: 700; }
+.shop-price-strike { font-size: 11px; color: var(--text3); text-decoration: line-through; margin-top: 1px; }
+.shop-price-final { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 800; color: var(--text); margin-top: 1px; }
+.shop-price-final.discounted { color: var(--accent2); }
+.shop-price-final .shop-diskon-badge { font-size: 10px; font-weight: 700; color: var(--accent2); margin-left: 3px; }
+.shop-price-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
+.shop-product-right { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; flex-shrink: 0; }
+.shop-margin-badge { font-size: 11px; font-weight: 700; color: var(--accent3); background: var(--accent3-soft); padding: 3px 9px; border-radius: var(--r-pill); white-space: nowrap; }
+.shop-product-actions { display: flex; gap: 6px; }
+.shop-product-actions button { background: var(--surface3); border: none; width: 29px; height: 29px; border-radius: var(--r-sm); font-size: 13px; cursor: pointer; color: var(--text2); }
 .acc-chip { font-size:var(--fs-label); padding: 2px 7px; border-radius: 10px; background: var(--surface3); color: var(--text2); margin-left: 5px; }
 .u-hint10 { font-size:12px; color:var(--text2); margin-bottom:10px; line-height:1.5; }
 .u-hint12 { font-size:12px; color:var(--text2); margin-bottom:12px; line-height:1.5; }

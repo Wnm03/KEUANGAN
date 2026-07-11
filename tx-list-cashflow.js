@@ -54,13 +54,13 @@ const p=D.products.find(x=>x.id===t.stockProductId);
 if(p){p.stock=Math.max(0,(p.stock||0)-(t.stockQty||0));toast(`📦 Stok "${p.name}" dikurangi ${t.stockQty} (transaksi dihapus)`,2600);}
 }
 if(t&&t.cobekLinkId){
-const linkedCobek=D.cobek.find(c=>c.id===t.cobekLinkId);
-if(linkedCobek&&linkedCobek.items){
-linkedCobek.items.forEach(it=>{const p=D.products.find(x=>x.id===it.productId);if(p)p.stock=(p.stock||0)+it.qty;});
+const linkedShop=D.cobek.find(c=>c.id===t.cobekLinkId);
+if(linkedShop&&linkedShop.items){
+linkedShop.items.forEach(it=>{const p=D.products.find(x=>x.id===it.productId);if(p)p.stock=(p.stock||0)+it.qty;});
 toast(`🪨 Stok dikembalikan, penjualan Shop terkait dihapus`,2600);
 }
 D.cobek=D.cobek.filter(c=>c.id!==t.cobekLinkId);
-renderCobek();renderCobekRecent();
+renderShop();renderShopRecent();
 }
 if(t&&t.servisLinkId&&D.servisLogs){
 const linkedServis=D.servisLogs.find(s=>s.id===t.servisLinkId);

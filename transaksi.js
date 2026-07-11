@@ -1,5 +1,5 @@
 // transaksi.js — Form Tambah/Edit Transaksi Keuangan: autocomplete kategori/produk,
-// panel kendaraan (BBM/sparepart/stok cobek), target Dana Darurat, catatan/reminder/
+// panel kendaraan (BBM/sparepart/stok shop), target Dana Darurat, catatan/reminder/
 // transfer, dan simpan transaksi (saveTx) — mesin utama halaman Keuangan.
 // (v92): ditambah domain "List Transaksi & Cashflow Forecast" (txHTML/delTx/changeMonth/
 // setTxListPeriode/getTxListRange/setPeriode/getRange/computeCashflowForecast), dipindah dari
@@ -70,22 +70,37 @@ updateTxVehiclePanels();
 setTimeout(()=>{const el=document.getElementById('catName'); if(el&&q)el.value=q;},50);
 }
 function onTxSubCatInput(){
-const catName=document.getElementById('txCat').value.trim();
 const box=document.getElementById('txSubCatSuggestBox');
-if(!catName){
-box.innerHTML='<div class="suggest-empty">Isi/pilih Kategori dulu di atas.</div>';
-box.style.display='block';
-return;
-}
-const cat=getCatByType(catName,curTxType);
-const subs=(cat&&cat.subs)||[];
+const catName=document.getElementById('txCat').value.trim();
 const q=document.getElementById('txSubCat').value.trim().toLowerCase();
-const matches=subs.filter(s=>!q||s.name.toLowerCase().includes(q));
+const cats=getCatsByType(curTxType);
+// Kumpulkan subkategori dari SEMUA kategori (tipe yg sama), bukan cuma kategori yang
+// sudah diisi di atas -- supaya bisa ketik/pilih Subkategori duluan sebelum isi
+// Kategori, atau langsung klik field ini buat lihat semua subkategori yg ada. Begitu
+// salah satu dipilih, Kategori utama otomatis ke-sync (lihat selectTxSubCatWithCat).
+let candidates=[];
+cats.forEach(c=>{(c.subs||[]).forEach(s=>{candidates.push({catName:c.name,catEmoji:c.emoji,subName:s.name});});});
+if(catName){
+// Kategori yg sudah diisi diprioritaskan tampil duluan, tapi subkategori kategori
+// lain tetap ikut muncul (biar bisa ganti kategori lewat Subkategori juga).
+candidates.sort((a,b)=>(b.catName===catName)-(a.catName===catName));
+}
+const matches=candidates.filter(c=>!q||c.subName.toLowerCase().includes(q));
 let html='<div class="suggest-item" onmousedown="event.preventDefault();selectTxSubCat(\'\')">— Tanpa subkategori —</div>';
-html+=matches.map(s=>`<div class="suggest-item" onmousedown="event.preventDefault();selectTxSubCat('${jsAttrEscape(s.name)}')">${escapeHtml(s.name)}</div>`).join('');
-if(!matches.length && q) html+='<div class="suggest-empty">Tidak ada subkategori cocok di kategori ini.</div>';
+html+=matches.slice(0,30).map(c=>`<div class="suggest-item" onmousedown="event.preventDefault();selectTxSubCatWithCat('${jsAttrEscape(c.catName)}','${jsAttrEscape(c.subName)}')">${escapeHtml(c.subName)} <span style="color:var(--text3);font-size:11px">— ${escapeHtml(c.catEmoji||'📦')} ${escapeHtml(c.catName)}</span></div>`).join('');
+if(!matches.length && q) html+='<div class="suggest-empty">Tidak ada subkategori yang cocok.</div>';
 box.innerHTML=html;
 box.style.display='block';
+}
+function selectTxSubCatWithCat(catName,subName){
+const catEl=document.getElementById('txCat');
+if(catEl.value!==catName){
+catEl.value=catName;
+applyLastAccForCat(catName);
+}
+document.getElementById('txSubCat').value=subName;
+hideSuggestBox('txSubCatSuggestBox');
+updateTxVehiclePanels();
 }
 function selectTxSubCat(subName){
 document.getElementById('txSubCat').value=subName;
@@ -171,27 +186,27 @@ if(!isKendaraanCatName(catName))return false;
 if(isBensinSubName(subName))return false;
 return true;
 }
-// Catatan: isCobekStockCatName (detektor kategori Stok/Penjualan Cobek/Shop)
+// Catatan: isShopStockCatName (detektor kategori Stok/Penjualan Shop/Shop)
 // dipindah ke tx-cobek.js (lihat CLAUDE.md catatan kerja "split transaksi.js"
 // bagian ke-9) -- tetap fungsi global, tetap dipanggil persis sama dari
 // updateTxVehiclePanels() di bawah ini.
 function updateTxVehiclePanels(){
 const stockPanel=document.getElementById('txStockPanel');
 const bbmPanel=document.getElementById('txBbmPanel');
-const cobekPanel=document.getElementById('txCobekStockPanel');
-const cobekSalePanel=document.getElementById('txCobekSalePanel');
+const shopPanel=document.getElementById('txShopStockPanel');
+const shopSalePanel=document.getElementById('txShopSalePanel');
 if(!stockPanel||!bbmPanel)return;
 const catName=document.getElementById('txCat').value;
 const subName=document.getElementById('txSubCat')?document.getElementById('txSubCat').value:'';
 const isExpense=curTxType==='expense';
 const showBbm=isExpense&&isKendaraanCatName(catName)&&isBensinSubName(subName);
 const showStock=isExpense&&!showBbm&&isSparepartSubName(catName,subName);
-const showCobek=isExpense&&!showBbm&&!showStock&&isCobekStockCatName(catName,subName);
-const showCobekSale=!isExpense&&isCobekStockCatName(catName,subName);
+const showShop=isExpense&&!showBbm&&!showStock&&isShopStockCatName(catName,subName);
+const showShopSale=!isExpense&&isShopStockCatName(catName,subName);
 bbmPanel.style.display=showBbm?'block':'none';
 stockPanel.style.display=showStock?'block':'none';
-if(cobekPanel)cobekPanel.style.display=showCobek?'block':'none';
-if(cobekSalePanel)cobekSalePanel.style.display=showCobekSale?'block':'none';
+if(shopPanel)shopPanel.style.display=showShop?'block':'none';
+if(shopSalePanel)shopSalePanel.style.display=showShopSale?'block':'none';
 if(showBbm){
 populateTxBbmVehicleSelect();
 } else {
@@ -206,21 +221,21 @@ const chk=document.getElementById('txAddStock');
 if(chk)chk.checked=false;
 toggleTxStockFields();
 }
-if(showCobek){
-populateTxCobekStockSelect();
+if(showShop){
+populateTxShopStockSelect();
 } else {
-const chk=document.getElementById('txAddCobekStock');
+const chk=document.getElementById('txAddShopStock');
 if(chk)chk.checked=false;
-toggleTxCobekStockFields();
-resetCobekStockCart();
+toggleTxShopStockFields();
+resetShopStockCart();
 }
-if(showCobekSale){
-populateTxCobekSaleSelect();
+if(showShopSale){
+populateTxShopSaleSelect();
 } else {
-const chk=document.getElementById('txAddCobekSale');
+const chk=document.getElementById('txAddShopSale');
 if(chk)chk.checked=false;
-toggleTxCobekSaleFields();
-resetTxCobekSaleCart();
+toggleTxShopSaleFields();
+resetTxShopSaleCart();
 }
 }
 // Catatan: fungsi-fungsi form BBM (populateTxBbmVehicleSelect, toggleTxBbmFields,
@@ -308,19 +323,19 @@ if(bbmChk)bbmChk.checked=false;
 ['txBbmKm','txBbmLiter','txBbmHargaL','txBbmSpbu'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 const bbmFullEl=document.getElementById('txBbmFull'); if(bbmFullEl)bbmFullEl.checked=true;
 toggleTxBbmFields();
-const cobekChk=document.getElementById('txAddCobekStock');
-if(cobekChk)cobekChk.checked=false;
-['txCobekStockNewName','txCobekStockKategori','txCobekStockHarga','txCobekStockJual'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-const cobekQtyEl=document.getElementById('txCobekStockQty'); if(cobekQtyEl)cobekQtyEl.value='1';
-resetCobekStockCart();
-toggleTxCobekStockFields();
-const cobekSaleChk=document.getElementById('txAddCobekSale');
-if(cobekSaleChk)cobekSaleChk.checked=false;
-const cobekSaleQtyEl=document.getElementById('txCobekSaleQty'); if(cobekSaleQtyEl)cobekSaleQtyEl.value='1';
-const cobekSaleHargaEl=document.getElementById('txCobekSaleHarga'); if(cobekSaleHargaEl)cobekSaleHargaEl.value='';
-['txCobekSaleDiskon','txCobekSaleOngkir','txCobekSaleCustName','txCobekSaleCustPhone','txCobekSaleCustAddr'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-resetTxCobekSaleCart();
-toggleTxCobekSaleFields();
+const shopChk=document.getElementById('txAddShopStock');
+if(shopChk)shopChk.checked=false;
+['txShopStockNewName','txShopStockKategori','txShopStockHarga','txShopStockJual'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+const shopQtyEl=document.getElementById('txShopStockQty'); if(shopQtyEl)shopQtyEl.value='1';
+resetShopStockCart();
+toggleTxShopStockFields();
+const shopSaleChk=document.getElementById('txAddShopSale');
+if(shopSaleChk)shopSaleChk.checked=false;
+const shopSaleQtyEl=document.getElementById('txShopSaleQty'); if(shopSaleQtyEl)shopSaleQtyEl.value='1';
+const shopSaleHargaEl=document.getElementById('txShopSaleHarga'); if(shopSaleHargaEl)shopSaleHargaEl.value='';
+['txShopSaleDiskon','txShopSaleOngkir','txShopSaleCustName','txShopSaleCustPhone','txShopSaleCustAddr'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+resetTxShopSaleCart();
+toggleTxShopSaleFields();
 openModal('txModal');
 }
 function resetPayMethodLock(){
@@ -350,56 +365,56 @@ updateTxVehiclePanels();
 const stockChk=document.getElementById('txAddStock');
 if(stockChk)stockChk.checked=false;
 toggleTxStockFields();
-const cobekChk=document.getElementById('txAddCobekStock');
-const hasCobekStock=(t.stockItems&&t.stockItems.length)||t.stockProductId;
-if(hasCobekStock&&cobekChk){
-cobekChk.checked=true;
-toggleTxCobekStockFields();
+const shopChk=document.getElementById('txAddShopStock');
+const hasShopStock=(t.stockItems&&t.stockItems.length)||t.stockProductId;
+if(hasShopStock&&shopChk){
+shopChk.checked=true;
+toggleTxShopStockFields();
 if(t.stockItems&&t.stockItems.length){
-curCobekStockCart=t.stockItems.map(si=>({
+curShopStockCart=t.stockItems.map(si=>({
 productId:si.productId,isNew:false,
 name:(D.products.find(p=>p.id===si.productId)||{}).name||si.name||'Produk',
 qty:si.qty,hargaBeli:si.hargaBeli||0,produsenId:si.produsenId||'',kategoriInput:'',hargaJual:0
 }));
 } else {
 const legacyP=D.products.find(p=>p.id===t.stockProductId);
-curCobekStockCart=[{
+curShopStockCart=[{
 productId:t.stockProductId,isNew:false,
 name:legacyP?legacyP.name:'Produk',
 qty:t.stockQty||1,hargaBeli:legacyP?(legacyP.hargaBeli||0):0,produsenId:t.produsenId||'',kategoriInput:'',hargaJual:0
 }];
 }
-renderCobekStockCartList();
+renderShopStockCartList();
 if(t.produsenId){
-const prodSel=document.getElementById('txCobekStockProdusen');
+const prodSel=document.getElementById('txShopStockProdusen');
 if(prodSel)prodSel.value=t.produsenId;
 }
 } else {
-if(cobekChk)cobekChk.checked=false;
-resetCobekStockCart();
-toggleTxCobekStockFields();
+if(shopChk)shopChk.checked=false;
+resetShopStockCart();
+toggleTxShopStockFields();
 }
-const cobekSaleChk=document.getElementById('txAddCobekSale');
-const linkedCobekSale=t.cobekLinkId?D.cobek.find(c=>c.id===t.cobekLinkId):null;
-if(linkedCobekSale&&cobekSaleChk){
-cobekSaleChk.checked=true;
-toggleTxCobekSaleFields();
-curTxCobekSaleCart=(linkedCobekSale.items||[]).map(it=>({
+const shopSaleChk=document.getElementById('txAddShopSale');
+const linkedShopSale=t.cobekLinkId?D.cobek.find(c=>c.id===t.cobekLinkId):null;
+if(linkedShopSale&&shopSaleChk){
+shopSaleChk.checked=true;
+toggleTxShopSaleFields();
+curTxShopSaleCart=(linkedShopSale.items||[]).map(it=>({
 productId:it.productId,
 name:(D.products.find(p=>p.id===it.productId)||{}).name||it.name||'Produk',
 qty:it.qty,harga:it.harga
 }));
-renderTxCobekSaleCartList();
-const diskonEl=document.getElementById('txCobekSaleDiskon'); if(diskonEl)diskonEl.value=linkedCobekSale.diskon||'';
-const ongkirEl=document.getElementById('txCobekSaleOngkir'); if(ongkirEl)ongkirEl.value=linkedCobekSale.ongkir||'';
-const cust=linkedCobekSale.customer||{};
-const custNameEl=document.getElementById('txCobekSaleCustName'); if(custNameEl)custNameEl.value=cust.name||'';
-const custPhoneEl=document.getElementById('txCobekSaleCustPhone'); if(custPhoneEl)custPhoneEl.value=cust.phone||'';
-const custAddrEl=document.getElementById('txCobekSaleCustAddr'); if(custAddrEl)custAddrEl.value=cust.address||'';
+renderTxShopSaleCartList();
+const diskonEl=document.getElementById('txShopSaleDiskon'); if(diskonEl)diskonEl.value=linkedShopSale.diskon||'';
+const ongkirEl=document.getElementById('txShopSaleOngkir'); if(ongkirEl)ongkirEl.value=linkedShopSale.ongkir||'';
+const cust=linkedShopSale.customer||{};
+const custNameEl=document.getElementById('txShopSaleCustName'); if(custNameEl)custNameEl.value=cust.name||'';
+const custPhoneEl=document.getElementById('txShopSaleCustPhone'); if(custPhoneEl)custPhoneEl.value=cust.phone||'';
+const custAddrEl=document.getElementById('txShopSaleCustAddr'); if(custAddrEl)custAddrEl.value=cust.address||'';
 } else {
-if(cobekSaleChk)cobekSaleChk.checked=false;
-resetTxCobekSaleCart();
-toggleTxCobekSaleFields();
+if(shopSaleChk)shopSaleChk.checked=false;
+resetTxShopSaleCart();
+toggleTxShopSaleFields();
 }
 const bbmChk=document.getElementById('txSyncBbm');
 const linkedBbm=t.bbmLinkId?(D.bbmLogs||[]).find(b=>b.id===t.bbmLinkId):null;
@@ -498,8 +513,8 @@ const editingId=txEditId;
 const existingTx=editingId?D.transactions.find(t=>t.id===editingId):null;
 const existingBill=existingTx&&existingTx.billLinkId?D.bills.find(b=>b.id===existingTx.billLinkId):null;
 if(existingTx&&(existingTx.stockProductId||(existingTx.stockItems&&existingTx.stockItems.length))){
-const stillChecked=document.getElementById('txAddCobekStock')&&document.getElementById('txAddCobekStock').checked;
-const panelVisible=document.getElementById('txCobekStockPanel')&&document.getElementById('txCobekStockPanel').style.display!=='none';
+const stillChecked=document.getElementById('txAddShopStock')&&document.getElementById('txAddShopStock').checked;
+const panelVisible=document.getElementById('txShopStockPanel')&&document.getElementById('txShopStockPanel').style.display!=='none';
 if(!stillChecked||!panelVisible){
 if(existingTx.stockItems&&existingTx.stockItems.length){
 existingTx.stockItems.forEach(si=>{
@@ -515,16 +530,16 @@ renderProductList();
 }
 }
 if(existingTx&&existingTx.cobekLinkId){
-const stillChecked=document.getElementById('txAddCobekSale')&&document.getElementById('txAddCobekSale').checked;
-const panelVisible=document.getElementById('txCobekSalePanel')&&document.getElementById('txCobekSalePanel').style.display!=='none';
+const stillChecked=document.getElementById('txAddShopSale')&&document.getElementById('txAddShopSale').checked;
+const panelVisible=document.getElementById('txShopSalePanel')&&document.getElementById('txShopSalePanel').style.display!=='none';
 if(!stillChecked||!panelVisible){
-const prevCobek=D.cobek.find(c=>c.id===existingTx.cobekLinkId);
-if(prevCobek&&prevCobek.items){
-prevCobek.items.forEach(it=>{const pp=D.products.find(x=>x.id===it.productId);if(pp)pp.stock=(pp.stock||0)+it.qty;});
+const prevShop=D.cobek.find(c=>c.id===existingTx.cobekLinkId);
+if(prevShop&&prevShop.items){
+prevShop.items.forEach(it=>{const pp=D.products.find(x=>x.id===it.productId);if(pp)pp.stock=(pp.stock||0)+it.qty;});
 }
 D.cobek=D.cobek.filter(c=>c.id!==existingTx.cobekLinkId);
 delete existingTx.cobekLinkId;
-renderProductList();renderCobek();renderCobekRecent();
+renderProductList();renderShop();renderShopRecent();
 }
 }
 if(existingBill && curPayMethod===existingBill.kind){
@@ -602,7 +617,7 @@ D.bills.push({id:billId,name:nama,amount:perBulanMine,nextDue,freq:'bulanan',sis
 }
 D.transactions.push({id:billId+1,type:'expense',amount:perBulanMine,category:cat,subcategory:subCat,accountId:accId,payMethod:'cicilan',billLinkId:sisaTenor>0?billId:null,note:nama+(note?' - '+note:''),date});
 applyTxStockFromTx(nama);
-applyTxCobekStockFromTx(billId+1,nama,null);
+applyTxShopStockFromTx(billId+1,nama,null);
 WorthIt.applyBuyLink(billId+1);
 txEditId=null;
 rememberLastAccForCat(cat,accId);
@@ -627,7 +642,7 @@ D.bills.push({id:billId,name:nama,amount:amt,nextDue:dueNext.toISOString().split
 }
 D.transactions.push({id:billId+1,type:'expense',amount:amt,category:cat,subcategory:subCat,accountId:accId,payMethod:'langganan',note:nama+(note?' - '+note:''),date});
 applyTxStockFromTx(nama);
-applyTxCobekStockFromTx(billId+1,nama,null);
+applyTxShopStockFromTx(billId+1,nama,null);
 WorthIt.applyBuyLink(billId+1);
 txEditId=null;
 rememberLastAccForCat(cat,accId);
@@ -683,8 +698,8 @@ Tukang.applyPendingPayment(savedTxId);
 }
 applyTxStockFromTx(note);
 applyTxBbmFromTx(savedTxId,amt,date,accId,note,existingTx);
-applyTxCobekStockFromTx(savedTxId,note,existingTx);
-applyTxCobekSaleFromTx(savedTxId,date,accId,note,existingTx);
+applyTxShopStockFromTx(savedTxId,note,existingTx);
+applyTxShopSaleFromTx(savedTxId,date,accId,note,existingTx);
 txEditId=null;
 rememberLastAccForCat(cat,accId);
 if(_txCatLearnSource){learnCatFromItemName(_txCatLearnSource,cat);_txCatLearnSource=null;}

@@ -22,7 +22,7 @@ const start=new Date(d); start.setDate(d.getDate()-day); start.setHours(0,0,0,0)
 const end=new Date(start); end.setDate(start.getDate()+6); end.setHours(23,59,59,999);
 return {start,end};
 }
-let _wrLastTotal=0,_wrLastCount=0;
+let _wrLastTotal=0,_wrLastCount=0,_wrLastStart=null,_wrLastEnd=null;
 function checkWeeklySalaryReset(){
 const now=new Date();
 if(now.getDay()!==6) return;
@@ -32,7 +32,7 @@ const {start,end}=getWeekRange(now);
 const weekDays=D.workDays.filter(w=>{const d=new Date(w.date);return d>=start&&d<=end;});
 if(!weekDays.length){ D.lastResetPromptDate=ts; save(); return; }
 const total=weekDays.reduce((s,w)=>s+w.total,0);
-_wrLastTotal=total;_wrLastCount=weekDays.length;
+_wrLastTotal=total;_wrLastCount=weekDays.length;_wrLastStart=start;_wrLastEnd=end;
 document.getElementById('wrCount').textContent=weekDays.length;
 document.getElementById('wrTotal').textContent=fmtFull(total);
 const ckEl=document.getElementById('wrAutoIncome'); if(ckEl) ckEl.checked=true;
@@ -40,13 +40,20 @@ const accWrapEl=document.getElementById('wrAccWrap'); if(accWrapEl) accWrapEl.st
 const accEl=document.getElementById('wrAcc'); if(accEl&&D.accounts.length) accEl.value=D.accounts[0].id;
 openModal('weeklyResetModal');
 }
+// v181: dulu SELALU pakai minggu real sekarang (new Date()), padahal tombol "💰 Sudah Gajian?"
+// di tab Absensi muncul per MINGGU YANG SEDANG DIBROWSE (lihat panah ‹ › / Payroll.weekStart di
+// payroll-absensi.js) — akibatnya kalau user browse ke minggu LAMA yang masih pending & tap tombol
+// itu, yang ke-reset/dicatat malah minggu sekarang (salah/kosong), bukan minggu lama yang dimaksud.
+// Ini bikin notif "⚠️ N minggu pending" tidak pernah bisa benar-benar diselesaikan lewat tombol ini.
+// Fix: pakai Payroll.weekStart (minggu yang sedang tampil di layar) sbg target, fallback ke minggu
+// real sekarang kalau dipanggil di luar konteks itu (mis. modul Payroll belum sempat dimuat).
 function openWeeklyResetManual(){
-const now=new Date();
-const {start,end}=getWeekRange(now);
+const target=(typeof Payroll!=='undefined'&&Payroll.weekStart)?new Date(Payroll.weekStart):new Date();
+const {start,end}=getWeekRange(target);
 const weekDays=D.workDays.filter(w=>{const d=new Date(w.date);return d>=start&&d<=end;});
 if(!weekDays.length){toast('⚠️ Belum ada absensi minggu ini untuk dicatat');return;}
 const total=weekDays.reduce((s,w)=>s+w.total,0);
-_wrLastTotal=total;_wrLastCount=weekDays.length;
+_wrLastTotal=total;_wrLastCount=weekDays.length;_wrLastStart=start;_wrLastEnd=end;
 populateAccFilters();
 document.getElementById('wrCount').textContent=weekDays.length;
 document.getElementById('wrTotal').textContent=fmtFull(total);
@@ -58,8 +65,12 @@ closeModal('gajiCalcModal');
 openModal('weeklyResetModal');
 }
 function confirmWeeklyReset(yes){
+// Pakai minggu yang di-"kunci" saat modal ini dibuka (_wrLastStart/_wrLastEnd), BUKAN dihitung
+// ulang dari new Date() — supaya konsisten dgn minggu yang ditampilkan ke user di modal
+// (termasuk kalau itu minggu lama yang sedang di-reset lewat notif pending), & aman dari race
+// condition kalau tanggal berganti persis saat modal ini terbuka.
+const {start,end}=(_wrLastStart&&_wrLastEnd)?{start:_wrLastStart,end:_wrLastEnd}:getWeekRange(new Date());
 const now=new Date();
-const {start,end}=getWeekRange(now);
 let incomeSaved=false;
 if(yes){
 const autoEl=document.getElementById('wrAutoIncome');
@@ -81,6 +92,7 @@ toast(incomeSaved?`✅ Absensi direset & ${fmtFull(_wrLastTotal)} dicatat sebaga
 toast('Oke, data absensi minggu ini tetap disimpan');
 }
 D.lastResetPromptDate=todayStr();
+_wrLastStart=null;_wrLastEnd=null;
 save();
 closeModal('weeklyResetModal');
 renderWorkDays();
