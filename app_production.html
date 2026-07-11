@@ -53,7 +53,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Keluarga W</title>
-<link rel="stylesheet" href="styles.css?v=180">
+<link rel="stylesheet" href="styles.css?v=187">
 <script>
 /* Debug console (Eruda) — aktifkan sekali lewat ?debug=1 di URL, nempel via localStorage.
    Matikan lagi lewat ?debug=0. Tidak aktif buat user biasa. */
@@ -105,8 +105,8 @@ b.appendChild(closeBtn);
 }catch(_e){ console.error('Gagal tampilkan banner error modul:',_e); }
 };
 </script>
-<script src="app-bundle-a.min.js?v=180" onerror="window.__moduleLoadFail('app-bundle-a.min.js')"></script>
-<script src="smoke-test.js?v=180" defer></script>
+<script src="app-bundle-a.min.js?v=187" onerror="window.__moduleLoadFail('app-bundle-a.min.js')"></script>
+<script src="smoke-test.js?v=187" defer></script>
 <link rel="manifest" id="pwaManifestLink" href="manifest.json">
 </head>
 <body data-theme="dark">
@@ -350,7 +350,7 @@ b.appendChild(closeBtn);
     <div class="stat-box clickable" data-action="showFilteredTx" data-args='["dashboard", "income", "\ud83d\udc9a Pemasukan Bulan Ini"]'><div class="stat-label">💚 Pemasukan</div><div class="stat-val green" id="dIncome">Rp 0</div></div>
     <div class="stat-box clickable" data-action="showFilteredTx" data-args='["dashboard", "expense", "\ud83d\udd34 Pengeluaran Bulan Ini"]'><div class="stat-label">🔴 Pengeluaran</div><div class="stat-val red" id="dExpense">Rp 0</div></div>
     <div class="stat-box clickable" data-action="showFilteredTx" data-args='["dashboard", "all", "\ud83d\udcb0 Saldo Bersih Bulan Ini"]'><div class="stat-label">💰 Saldo Bersih</div><div class="stat-val purple" id="dBalance">Rp 0</div></div>
-    <div class="stat-box clickable" data-action="goToList" data-args='["cobekList", "cobek", 2, "riwayat"]'><div class="stat-label">🪨 Untung Shop</div><div class="stat-val orange" id="dCobek">Rp 0</div></div>
+    <div class="stat-box clickable" data-action="goToList" data-args='["shopList", "shop", 2, "riwayat"]'><div class="stat-label">🪨 Untung Shop</div><div class="stat-val orange" id="dShop">Rp 0</div></div>
   </div>
   <div class="card u-mb12 u-pointer" id="dashLaporanMiniCard" data-onclick="showPage('keuangan',document.querySelectorAll('.nav-item')[1]);setKeuanganTab('laporan',document.querySelectorAll('#page-keuangan .cn-tab')[1])">
     <div class="card-title">📊 Ringkasan Laporan Bulan Ini <span class="u-flexc8"><span class="u-fw400 u-fs12 u-cacc" style="text-transform:none;letter-spacing:0">Lihat Detail →</span><span class="card-collapse-toggle" id="dashLaporanMiniCard-chev" data-action="toggleCardCollapse" data-args='["dashLaporanMiniCard","$event"]' aria-label="Buka/tutup bagian">▾</span></span></div>
@@ -735,29 +735,29 @@ b.appendChild(closeBtn);
   </div>
 </div>
 
-<!-- COBEK -->
-<div class="page" id="page-cobek">
+<!-- SHOP -->
+<div class="page" id="page-shop">
   <div class="page-settings-btn">
     <div class="page-title">🪨 Bisnis Shop</div>
-    <button class="qs-btn" data-action="openQS" data-args='["qsCobek"]' aria-label="Buka menu cepat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> ⚙️</button>
+    <button class="qs-btn" data-action="openQS" data-args='["qsShop"]' aria-label="Buka menu cepat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> ⚙️</button>
   </div>
-  <div class="cobek-grid">
-    <div class="cobek-stat clickable" data-action="goToList" data-args='["cobekList", null, null, "riwayat"]'><div class="cobek-val" id="cTrip">0</div><div class="cobek-lbl">Transaksi</div></div>
-    <div class="cobek-stat clickable" data-action="goToList" data-args='["cobekList", null, null, "riwayat"]'><div class="cobek-val u-fs14" id="cSet">Rp 0</div><div class="cobek-lbl">Omzet</div></div>
-    <div class="cobek-stat clickable" data-action="goToList" data-args='["cobekList", null, null, "riwayat"]'><div class="cobek-val u-fs14" id="cUntung">Rp 0</div><div class="cobek-lbl">Total Untung</div></div>
+  <div class="shop-grid">
+    <div class="shop-stat clickable" data-action="goToList" data-args='["shopList", null, null, "riwayat"]'><div class="shop-val" id="cTrip">0</div><div class="shop-lbl">Transaksi</div></div>
+    <div class="shop-stat clickable" data-action="goToList" data-args='["shopList", null, null, "riwayat"]'><div class="shop-val u-fs14" id="cSet">Rp 0</div><div class="shop-lbl">Omzet</div></div>
+    <div class="shop-stat clickable" data-action="goToList" data-args='["shopList", null, null, "riwayat"]'><div class="shop-val u-fs14" id="cUntung">Rp 0</div><div class="shop-lbl">Total Untung</div></div>
   </div>
 
   <div class="cn-tabs" style="overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch">
-    <button class="cn-tab active tab-fixed-pad" data-action="setCobekTab" data-args='["kasir", "$el"]'>🧠 Kasir AI</button>
-    <button class="cn-tab tab-fixed-pad" data-action="setCobekTab" data-args='["jual", "$el"]'>🛒 Manual</button>
-    <button class="cn-tab tab-fixed-pad" data-action="setCobekTab" data-args='["etalase", "$el"]'>📦 Etalase</button>
-    <button class="cn-tab tab-fixed-pad" data-action="setCobekTab" data-args='["produsen", "$el"]'>🏭 Produsen</button>
-    <button class="cn-tab tab-fixed-pad" data-action="setCobekTab" data-args='["riwayat", "$el"]'>📋 Riwayat</button>
-    <button class="cn-tab tab-fixed-pad" data-action="setCobekTab" data-args='["pelanggan", "$el"]'>👤 Pelanggan</button>
+    <button class="cn-tab active tab-fixed-pad" data-action="setShopTab" data-args='["kasir", "$el"]'>🧠 Kasir AI</button>
+    <button class="cn-tab tab-fixed-pad" data-action="setShopTab" data-args='["jual", "$el"]'>🛒 Manual</button>
+    <button class="cn-tab tab-fixed-pad" data-action="setShopTab" data-args='["etalase", "$el"]'>📦 Etalase</button>
+    <button class="cn-tab tab-fixed-pad" data-action="setShopTab" data-args='["produsen", "$el"]'>🏭 Produsen</button>
+    <button class="cn-tab tab-fixed-pad" data-action="setShopTab" data-args='["riwayat", "$el"]'>📋 Riwayat</button>
+    <button class="cn-tab tab-fixed-pad" data-action="setShopTab" data-args='["pelanggan", "$el"]'>👤 Pelanggan</button>
   </div>
 
   <!-- KASIR AI (baru, v127) -->
-  <div id="cobekTab-kasir">
+  <div id="shopTab-kasir">
     <div class="search-wrap u-mb10">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text3)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
       <input class="fi" id="kasirSearch" style="padding-left:38px" placeholder="Cari produk..." oninput="Kasir.onSearch(this.value)" autocomplete="off">
@@ -799,15 +799,15 @@ b.appendChild(closeBtn);
   </div>
 
   <!-- TRANSAKSI / JUAL (manual, cara lama — tetap ada sbg fallback) -->
-  <div id="cobekTab-jual" class="u-dnone">
+  <div id="shopTab-jual" class="u-dnone">
     <button class="btn btn-primary btn-full" style="padding:14px;margin:12px 0" data-action="openOrderModal" aria-label="Edit/Buka">+ Transaksi Baru</button>
-    <div class="card"><div class="card-title">⚡ Transaksi Terakhir</div><div id="cobekRecentList"><div class="empty"><div class="empty-icon">🪨</div><div class="empty-text">Belum ada transaksi</div></div></div></div>
+    <div class="card"><div class="card-title">⚡ Transaksi Terakhir</div><div id="shopRecentList"><div class="empty"><div class="empty-icon">🪨</div><div class="empty-text">Belum ada transaksi</div></div></div></div>
   </div>
 
   <!-- ETALASE -->
-  <div id="cobekTab-etalase" class="u-dnone">
+  <div id="shopTab-etalase" class="u-dnone">
     <button class="btn btn-primary btn-full" style="padding:14px;margin:12px 0" data-action="openProductModal" aria-label="Edit/Buka">+ Tambah Produk</button>
-    <div class="u-fs12 u-t2 u-mb8">💡 Stok juga otomatis bertambah kalau kamu catat pengeluaran kategori "Bisnis" sub "Cobek" di tab Keuangan — 2 arah, tetap sinkron.</div>
+    <div class="u-fs12 u-t2 u-mb8">💡 Stok juga otomatis bertambah kalau kamu catat pengeluaran kategori "Bisnis" sub "Shop" di tab Keuangan — 2 arah, tetap sinkron.</div>
     <div class="card" id="priceRekoWidgetCard" style="display:none">
       <div class="card-title">🤖 Rekomendasi Harga Jual AI</div>
       <div class="u-fs12 u-t2 u-mb8">Estimasi cepat & gratis (rule-based, dari margin rata-rata produk sekategori + biaya transport BBM) — bukan hasil AI+web search. Tap 🔍 di produk yang ditandai buat verifikasi ke harga pasar sungguhan via AI.</div>
@@ -818,42 +818,42 @@ b.appendChild(closeBtn);
       <div class="u-fs12 u-t2 u-mb8">Estimasi cepat & gratis (rule-based, dari kecepatan jual histori Penjualan Shop) — produk yang stoknya diperkirakan habis dalam ≤14 hari ditandai di sini, lengkap saran jumlah tambahan.</div>
       <div id="stockRekoWidgetList"></div>
     </div>
-    <div class="card"><div class="card-title">📦 Etalase Produk</div><div id="productList"><div class="empty"><div class="empty-icon">📦</div><div class="empty-text">Belum ada produk</div></div></div></div>
+    <div class="card"><div class="card-title">📦 Etalase Produk</div><div id="productList" class="shop-product-grid"><div class="empty"><div class="empty-icon">📦</div><div class="empty-text">Belum ada produk</div></div></div></div>
   </div>
 
   <!-- PRODUSEN -->
-  <div id="cobekTab-produsen" class="u-dnone">
+  <div id="shopTab-produsen" class="u-dnone">
     <button class="btn btn-primary btn-full" style="padding:14px;margin:12px 0" data-action="openProdusenModal" aria-label="Edit/Buka">+ Tambah Produsen</button>
     <div class="u-fs12 u-t2 u-mb8">💡 Harga beli tiap produsen bisa beda-beda untuk produk yang sama. Atur harga per produsen lewat tombol "💰 Atur Harga".</div>
     <div class="card"><div class="card-title">🏭 Daftar Produsen / Supplier</div><div id="produsenList"><div class="empty"><div class="empty-icon">🏭</div><div class="empty-text">Belum ada produsen</div></div></div></div>
   </div>
 
   <!-- RIWAYAT -->
-  <div id="cobekTab-riwayat" class="u-dnone">
-    <div class="filter-scroll u-mt12" id="cobekPeriodeChips">
-      <button class="chip-btn" data-action="setCobekPeriode" data-args='["hari", "$el"]'>Harian</button>
-      <button class="chip-btn" data-action="setCobekPeriode" data-args='["minggu", "$el"]'>Mingguan</button>
-      <button class="chip-btn" data-action="setCobekPeriode" data-args='["bulan", "$el"]'>Bulanan</button>
-      <button class="chip-btn" data-action="setCobekPeriode" data-args='["tahun", "$el"]'>Tahunan</button>
-      <button class="chip-btn active" data-action="setCobekPeriode" data-args='["selamanya", "$el"]'>Selamanya</button>
-      <button class="chip-btn" data-action="setCobekPeriode" data-args='["custom", "$el"]'>Custom</button>
+  <div id="shopTab-riwayat" class="u-dnone">
+    <div class="filter-scroll u-mt12" id="shopPeriodeChips">
+      <button class="chip-btn" data-action="setShopPeriode" data-args='["hari", "$el"]'>Harian</button>
+      <button class="chip-btn" data-action="setShopPeriode" data-args='["minggu", "$el"]'>Mingguan</button>
+      <button class="chip-btn" data-action="setShopPeriode" data-args='["bulan", "$el"]'>Bulanan</button>
+      <button class="chip-btn" data-action="setShopPeriode" data-args='["tahun", "$el"]'>Tahunan</button>
+      <button class="chip-btn active" data-action="setShopPeriode" data-args='["selamanya", "$el"]'>Selamanya</button>
+      <button class="chip-btn" data-action="setShopPeriode" data-args='["custom", "$el"]'>Custom</button>
     </div>
-    <div class="u-dnone u-mb10" id="cobekCustomRange">
+    <div class="u-dnone u-mb10" id="shopCustomRange">
       <div class="u-grid2">
-        <div><label class="fl">Dari</label><input type="date" class="fi" id="cobekFrom" onchange="renderCobek()"></div>
-        <div><label class="fl">Sampai</label><input type="date" class="fi" id="cobekTo" onchange="renderCobek()"></div>
+        <div><label class="fl">Dari</label><input type="date" class="fi" id="shopFrom" onchange="renderShop()"></div>
+        <div><label class="fl">Sampai</label><input type="date" class="fi" id="shopTo" onchange="renderShop()"></div>
       </div>
     </div>
     <div class="card u-mt12">
       <div class="card-title">📈 Tren Penjualan 6 Bulan</div>
-      <div class="grafik-bar-wrap" id="cobekGrafikBars"></div>
+      <div class="grafik-bar-wrap" id="shopGrafikBars"></div>
       <div class="u-fs12 u-t2 u-mt6">Jumlah set terjual per bulan & estimasi margin keuntungan (%)</div>
     </div>
-    <div class="card u-mt12"><div class="card-title">📋 Riwayat Transaksi <button class="card-setting-btn" data-action="openQS" data-args='["qsCobek"]'>⚙️ Atur</button></div><div id="cobekList"><div class="empty"><div class="empty-icon">🪨</div><div class="empty-text">Belum ada transaksi</div></div></div></div>
+    <div class="card u-mt12"><div class="card-title">📋 Riwayat Transaksi <button class="card-setting-btn" data-action="openQS" data-args='["qsShop"]'>⚙️ Atur</button></div><div id="shopList"><div class="empty"><div class="empty-icon">🪨</div><div class="empty-text">Belum ada transaksi</div></div></div></div>
   </div>
 
   <!-- PELANGGAN -->
-  <div id="cobekTab-pelanggan" class="u-dnone">
+  <div id="shopTab-pelanggan" class="u-dnone">
     <div class="card u-mt12">
       <div class="card-title">👤 Daftar Pelanggan</div>
       <div class="u-hint10">Pelanggan dengan 3x order atau lebih otomatis ditandai 🌟 Langganan. Tap untuk lihat riwayat harga per produk.</div>
@@ -1698,30 +1698,30 @@ b.appendChild(closeBtn);
   </div>
 </div>
 
-<!-- QUICK SETTINGS: COBEK -->
-<div class="qs-modal-overlay" id="qsCobek" role="dialog" aria-modal="true" aria-labelledby="qsCobek-title">
+<!-- QUICK SETTINGS: SHOP -->
+<div class="qs-modal-overlay" id="qsShop" role="dialog" aria-modal="true" aria-labelledby="qsShop-title">
   <div class="qs-modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="qsCobek-title"><span>⚙️ Pengaturan Shop</span><button class="modal-close" data-action="closeQS" data-args='["qsCobek"]' aria-label="Tutup">✕</button></div>
+    <div class="modal-title" id="qsShop-title"><span>⚙️ Pengaturan Shop</span><button class="modal-close" data-action="closeQS" data-args='["qsShop"]' aria-label="Tutup">✕</button></div>
     <div class="qs-section">
       <div class="qs-section-title">📦 Produk & Etalase</div>
       <div class="qs-grid2">
-        <div class="qs-action" data-onclick="closeQS('qsCobek');openProductModal()"><div class="qs-action-icon">➕</div><div class="qs-action-label">Tambah Produk</div></div>
-        <div class="qs-action" data-onclick="closeQS('qsCobek');setCobekTab('etalase',document.querySelectorAll('#page-cobek .cn-tab')[1])"><div class="qs-action-icon">📦</div><div class="qs-action-label">Lihat Etalase</div></div>
+        <div class="qs-action" data-onclick="closeQS('qsShop');openProductModal()"><div class="qs-action-icon">➕</div><div class="qs-action-label">Tambah Produk</div></div>
+        <div class="qs-action" data-onclick="closeQS('qsShop');setShopTab('etalase',document.querySelectorAll('#page-shop .cn-tab')[1])"><div class="qs-action-icon">📦</div><div class="qs-action-label">Lihat Etalase</div></div>
       </div>
     </div>
     <div class="qs-section">
       <div class="qs-section-title">🛒 Transaksi</div>
       <div class="qs-grid2">
-        <div class="qs-action" data-onclick="closeQS('qsCobek');openOrderModal()"><div class="qs-action-icon">🛒</div><div class="qs-action-label">Transaksi Baru</div></div>
-        <div class="qs-action" data-onclick="closeQS('qsCobek');setCobekTab('riwayat',document.querySelectorAll('#page-cobek .cn-tab')[3])"><div class="qs-action-icon">📋</div><div class="qs-action-label">Riwayat</div></div>
+        <div class="qs-action" data-onclick="closeQS('qsShop');openOrderModal()"><div class="qs-action-icon">🛒</div><div class="qs-action-label">Transaksi Baru</div></div>
+        <div class="qs-action" data-onclick="closeQS('qsShop');setShopTab('riwayat',document.querySelectorAll('#page-shop .cn-tab')[3])"><div class="qs-action-icon">📋</div><div class="qs-action-label">Riwayat</div></div>
       </div>
     </div>
     <div class="qs-section">
       <div class="qs-section-title">💾 Data</div>
       <div class="qs-grid2">
-        <div class="qs-action" data-onclick="closeQS('qsCobek');openBackupModal()"><div class="qs-action-icon">📤</div><div class="qs-action-label">Backup Shop</div></div>
-        <div class="qs-action" data-onclick="closeQS('qsCobek');showPage('settings',document.querySelectorAll('.nav-item')[6])"><div class="qs-action-icon">⚙️</div><div class="qs-action-label">Setelan Lanjutan</div></div>
+        <div class="qs-action" data-onclick="closeQS('qsShop');openBackupModal()"><div class="qs-action-icon">📤</div><div class="qs-action-label">Backup Shop</div></div>
+        <div class="qs-action" data-onclick="closeQS('qsShop');showPage('settings',document.querySelectorAll('.nav-item')[6])"><div class="qs-action-icon">⚙️</div><div class="qs-action-label">Setelan Lanjutan</div></div>
       </div>
     </div>
   </div>
@@ -1858,7 +1858,7 @@ b.appendChild(closeBtn);
     <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
     Uang<div class="nav-dot"></div>
   </button>
-  <button class="nav-item" aria-current="false" data-action="showPage" data-args='["cobek", "$el"]'>
+  <button class="nav-item" aria-current="false" data-action="showPage" data-args='["shop", "$el"]'>
     <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
     Shop<div class="nav-dot"></div>
   </button>
@@ -1948,7 +1948,7 @@ b.appendChild(closeBtn);
 <!-- MODAL: UTANG (BUKU UTANG) -->
 <script>document.write(MODAL_HTML[11]);</script><!-- modal:debtModal externalized to modals.js -->
 
-<!-- MODAL: COBEK -->
+<!-- MODAL: SHOP -->
 <!-- MODAL: PRODUK ETALASE -->
 <script>document.write(MODAL_HTML[12]);</script><!-- modal:productModal externalized to modals.js -->
 
@@ -2113,6 +2113,6 @@ b.appendChild(closeBtn);
 <script>document.write(MODAL_HTML[64]);</script><!-- modal:budgetSettingsModal externalized to modals.js -->
 <script>document.write(MODAL_HTML[65]);</script><!-- modal:refleksiModal (Refleksi & Self-Care) -->
 
-<script src="app-bundle-b.min.js?v=180" onerror="window.__moduleLoadFail('app-bundle-b.min.js')"></script>
+<script src="app-bundle-b.min.js?v=187" onerror="window.__moduleLoadFail('app-bundle-b.min.js')"></script>
 </body>
 </html>

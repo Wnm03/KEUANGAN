@@ -339,7 +339,7 @@ test('delAcc — user batal konfirmasi -> tidak jadi hapus', async () => {
   assert.equal(calls.save, 0);
 });
 
-test('delAcc — hapus & pindahkan semua data terkait (transaksi/tagihan/BBM/servis/cobek) ke akun fallback', async () => {
+test('delAcc — hapus & pindahkan semua data terkait (transaksi/tagihan/BBM/servis/shop) ke akun fallback', async () => {
   const D = {
     accounts: [{ id: 'a1', name: 'Cash' }, { id: 'a2', name: 'Bank' }],
     transactions: [{ accountId: 'a1' }, { accountId: 'a2' }],
@@ -365,7 +365,7 @@ test('delAcc — hapus & pindahkan semua data terkait (transaksi/tagihan/BBM/ser
   assert.ok(calls.toast[0].includes('dipindah ke "Bank"'));
 });
 
-test('delAcc — D.bills/bbmLogs/servisLogs/cobek tidak ada sama sekali (undefined) -> tidak error', async () => {
+test('delAcc — D.bills/bbmLogs/servisLogs/shop tidak ada sama sekali (undefined) -> tidak error', async () => {
   const D = { accounts: [{ id: 'a1' }, { id: 'a2' }], transactions: [] };
   const { ctx } = makeAkun(D);
   await assert.doesNotReject(() => ctx.delAcc(0));

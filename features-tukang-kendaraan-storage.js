@@ -1,4 +1,4 @@
-// features-tukang-kendaraan-storage.js — Dana darurat, keuangan/laporan/grafik, budget, cobek grafik, cashflow forecast, target
+// features-tukang-kendaraan-storage.js — Dana darurat, keuangan/laporan/grafik, budget, shop grafik, cashflow forecast, target
 // CATATAN: Sparepart (kategori & stok sparepart kendaraan) DIPINDAH ke sini dari features-etalase-piutang-renovai.js (sesi pemisahan domain Sparepart/kendaraan), karena helper matchingVehicleName()/codeFromName() yang dipakainya sudah ada di file ini.
 // PENTING: file ini HARUS dimuat sesuai urutan build.js (GROUP_A/GROUP_B) karena beberapa modul saling referensi. Urutan grup ini: features-helpers-global-security.js, diagnostik-versi.js, format-tema.js, error-handler.js, helper-teks.js, keamanan-pin.js, modal-navigasi.js, reset-gaji-mingguan.js, debug-console.js, pengaturan-search.js, onboarding.js, kalkulator-input.js, scan-ocr.js, akun.js, gaji-calc.js, transaksi.js, profil-pengaturan.js, kategori.js, tagihan-kalender.js, backup-restore.js, payroll-absensi.js, features-tukang-kendaraan-storage.js, features-aiwidget-reminder-gdrive-search.js, features-sheets-pwa-selftest.js
 

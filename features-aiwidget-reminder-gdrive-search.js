@@ -103,7 +103,7 @@ const now=new Date(),m=now.getMonth(),y=now.getFullYear();
 const txM=D.transactions.filter(t=>{const d=new Date(t.date);return d.getMonth()===m&&d.getFullYear()===y;});
 const inc=txM.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
 const exp=txM.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-const cobekTotal=D.cobek.reduce((s,t)=>s+t.profit,0);
+const shopTotal=D.cobek.reduce((s,t)=>s+t.profit,0);
 const targetInfo=D.targets.map(t=>`${escapeHtml(t.name)}: ${Math.round((t.saved/t.amount)*100)}%`).join(', ')||'Belum ada';
 const eduFundInfo=(D.eduFunds||[]).map(f=>{const c=EduFund.calc(f);const pct=c.fv>0?Math.round((c.terkumpul/c.fv)*100):0;return `${escapeHtml(f.name)} (target ${f.tahunTarget}): butuh ${fmtFull(c.fv)}, terkumpul ${pct}%, nabung ~${fmtFull(c.pmtBulanan)}/bln`;}).join('; ')||'Belum ada';
 const sewaKiosInfo=((D.sewaKios&&D.sewaKios.units)||[]).map(u=>`${escapeHtml(u.name)}: ${u.status==='disewa'?'disewa oleh '+(u.penyewa||'-')+' @'+fmtFull(u.hargaSewaBulanan||0)+'/bln':'kosong'}`).join('; ')||'Belum ada unit';
@@ -160,15 +160,15 @@ const wantSparepartDetail=mentionsAny('sparepart','spare part','gudang','stok pa
 const stockSparepartLow=D.partsStock.filter(p=>p.qty<=(p.minStock||1)).map(p=>`${escapeHtml(p.name)} (sisa ${p.qty}${p.unit?' '+p.unit:''})`).join(', ')||'Aman semua';
 const stockSparepartAllFull=D.partsStock.length?D.partsStock.map(p=>`${escapeHtml(p.name)}: ${p.qty}${p.unit?' '+p.unit:''}`).join(', '):'Belum ada stok sparepart';
 const stockSparepartAll=wantSparepartDetail?stockSparepartAllFull:(D.partsStock.length?`${D.partsStock.length} item tercatat (ringkasan — tanya lebih spesifik utk detail per item)`:'Belum ada stok sparepart');
-const wantCobekDetail=mentionsAny('cobek','produk','stok','etalase','produsen','supplier','batu','harga jual','hpp');
-const cobekProdukStokFull=D.products.length?D.products.map(p=>`${escapeHtml(p.name)} — stok ${p.stock}, harga jual ${fmtFull(p.hargaJual)}, HPP ${fmtFull(p.hargaBeli)}${cobekKategoriName(p.kategoriId)?', kategori '+cobekKategoriName(p.kategoriId):''}${p.produsenId?', produsen '+((D.produsen.find(pr=>pr.id===p.produsenId)||{}).name||''):''}`).join('; '):'Belum ada produk di etalase';
-const cobekProdukStok=wantCobekDetail?cobekProdukStokFull:(D.products.length?`${D.products.length} produk terdaftar (ringkasan — tanya lebih spesifik utk detail per produk)`:'Belum ada produk di etalase');
-const cobekLowStok=D.products.filter(p=>p.stock<=2).map(p=>p.name).join(', ')||'Aman';
-const cobekProdusenInfo=wantCobekDetail?(D.produsen.length?D.produsen.map(pr=>pr.name+(pr.contact?' ('+pr.contact+')':'')).join(', '):'Belum ada produsen tercatat'):`${D.produsen.length} produsen tercatat`;
-const cobekOmzet=D.cobek.reduce((s,t)=>s+(t.total||0),0);
-const cobekThisMonth=D.cobek.filter(t=>{const d=new Date(t.date);return d.getMonth()===m&&d.getFullYear()===y;});
-const cobekOmzetThisMonth=cobekThisMonth.reduce((s,t)=>s+(t.total||0),0);
-const cobekUntungThisMonth=cobekThisMonth.reduce((s,t)=>s+(t.profit||0),0);
+const wantShopDetail=mentionsAny('shop','produk','stok','etalase','produsen','supplier','batu','harga jual','hpp');
+const shopProdukStokFull=D.products.length?D.products.map(p=>`${escapeHtml(p.name)} — stok ${p.stock}, harga jual ${fmtFull(p.hargaJual)}, HPP ${fmtFull(p.hargaBeli)}${shopKategoriName(p.kategoriId)?', kategori '+shopKategoriName(p.kategoriId):''}${p.produsenId?', produsen '+((D.produsen.find(pr=>pr.id===p.produsenId)||{}).name||''):''}`).join('; '):'Belum ada produk di etalase';
+const shopProdukStok=wantShopDetail?shopProdukStokFull:(D.products.length?`${D.products.length} produk terdaftar (ringkasan — tanya lebih spesifik utk detail per produk)`:'Belum ada produk di etalase');
+const shopLowStok=D.products.filter(p=>p.stock<=2).map(p=>p.name).join(', ')||'Aman';
+const shopProdusenInfo=wantShopDetail?(D.produsen.length?D.produsen.map(pr=>pr.name+(pr.contact?' ('+pr.contact+')':'')).join(', '):'Belum ada produsen tercatat'):`${D.produsen.length} produsen tercatat`;
+const shopOmzet=D.cobek.reduce((s,t)=>s+(t.total||0),0);
+const shopThisMonth=D.cobek.filter(t=>{const d=new Date(t.date);return d.getMonth()===m&&d.getFullYear()===y;});
+const shopOmzetThisMonth=shopThisMonth.reduce((s,t)=>s+(t.total||0),0);
+const shopUntungThisMonth=shopThisMonth.reduce((s,t)=>s+(t.profit||0),0);
 const budgetInfo=D.budgets&&D.budgets.length?D.budgets.map(b=>{
 const used=D.transactions.filter(t=>{const d=new Date(t.date);return d.getMonth()===m&&d.getFullYear()===y&&budgetMatchesTx(b,t);}).reduce((s,t)=>s+t.amount,0);
 const pct=b.limit>0?Math.round(used/b.limit*100):0;
@@ -220,7 +220,7 @@ const pkp=Math.max(0,Math.floor((neto-getPTKP(pphStatusVal))/1000)*1000);
 const{pajak}=hitungPPh21Progresif(pkp);
 pphInfo=`PPh 21 setahun ${fmtFull(pajak)} (≈${fmtFull(Math.round(pajak/12))}/bulan), status ${pphStatusVal}`;
 }
-const umkmPajakBulan=Math.round(cobekOmzetThisMonth*0.005);
+const umkmPajakBulan=Math.round(shopOmzetThisMonth*0.005);
 const wantAsetDetail=mentionsAny('aset','harta','kekayaan','emas','tanah','rumah','investasi','net worth','netword','zakatable','portofolio','portfolio','kripto','crypto','saham','reksadana','untung','rugi','cuan','profit','loss','performa');
 const totalAsetNilai=totalAssetValue();
 const asetListInfoFull=(D.assets||[]).length?D.assets.map(a=>{
@@ -259,7 +259,7 @@ PERANMU:
 - FORMAT JAWABAN: langsung ke poin-poin penting pakai bullet (• atau -), JANGAN nulis paragraf panjang bertele-tele. Buka dengan 1 kalimat singkat kalau perlu konteks, terus langsung poin-poin utamanya — tiap poin singkat & padat, angka/data penting ditulis jelas. Kalau ujungnya perlu kesimpulan/saran, kasih 1 baris penutup singkat, bukan paragraf.
 - Tetap LENGKAP dan TUNTAS — jangan potong di tengah, jangan skip bagian pertanyaan yang belum kejawab — tapi rangkumnya padat, hindari basa-basi yang cuma buang-buang waktu baca.
 - Tidak ada batas kata, tapi utamakan singkat, jelas, to the point dibanding panjang & muter-muter.
-- CATATAN DATA: beberapa bagian (kendaraan/produk cobek/sparepart/aset) ditampilkan RINGKAS kalau pertanyaan user tidak spesifik menyinggung topik itu — supaya hemat. Kalau user tanya lebih detail soal salah satu topik itu, dia akan otomatis dapat versi lengkap di pertanyaan berikutnya (tidak perlu kamu minta dia ganti prompt, cukup jawab dari ringkasan yang ada, atau bilang "tanya lebih spesifik ya" kalau datanya belum cukup).
+- CATATAN DATA: beberapa bagian (kendaraan/produk shop/sparepart/aset) ditampilkan RINGKAS kalau pertanyaan user tidak spesifik menyinggung topik itu — supaya hemat. Kalau user tanya lebih detail soal salah satu topik itu, dia akan otomatis dapat versi lengkap di pertanyaan berikutnya (tidak perlu kamu minta dia ganti prompt, cukup jawab dari ringkasan yang ada, atau bilang "tanya lebih spesifik ya" kalau datanya belum cukup).
 - USUL AKSI (opsional): kalau dari obrolan JELAS user mau MENCATAT sesuatu yang konkret (bukan cuma nanya/curhat) — misal "catat aku abis beli bensin 50rb", "tambahin tagihan listrik 200rb jatuh tempo tgl 20", "servis motor kemarin ganti oli 80rb", "target nabung liburan 5jt", "catat anak udah bisa jalan hari ini", "masukin kampas rem 150rb ke wishlist/prioritas belanja" — tutup balasanmu dengan SATU blok persis format ini (di baris baru, setelah teks normal, JANGAN taruh di tengah kalimat):
 [[ACTION]]{"type":"<salah satu: add_transaksi|add_tagihan|add_servis|add_target|add_catatan_anak|add_wishlist>","data":{...}}[[/ACTION]]
   Field per tipe:
@@ -311,12 +311,12 @@ Kalau user tanya soal "kapan bisa pensiun/FIRE/kebebasan finansial", "cukup gak 
 PENGELUARAN 3 BULAN TERAKHIR PER KATEGORI:
 ${Object.entries(katMap).map(([k,v])=>`  ${k}: pemasukan ${fmtFull(v.inc)}, pengeluaran ${fmtFull(v.exp)}`).join('\n')}
 
-BISNIS SHOP (batu cobek PO system):
-- All-time: omzet ${fmtFull(cobekOmzet)}, untung ${fmtFull(cobekTotal)}, ${D.cobek.length} transaksi
-- Bulan ini: omzet ${fmtFull(cobekOmzetThisMonth)}, untung ${fmtFull(cobekUntungThisMonth)}, ${cobekThisMonth.length} transaksi
-- Produk etalase: ${cobekProdukStok}
-- Stok menipis (≤2): ${cobekLowStok}
-- Produsen/supplier: ${cobekProdusenInfo}
+BISNIS SHOP (batu shop PO system):
+- All-time: omzet ${fmtFull(shopOmzet)}, untung ${fmtFull(shopTotal)}, ${D.cobek.length} transaksi
+- Bulan ini: omzet ${fmtFull(shopOmzetThisMonth)}, untung ${fmtFull(shopUntungThisMonth)}, ${shopThisMonth.length} transaksi
+- Produk etalase: ${shopProdukStok}
+- Stok menipis (≤2): ${shopLowStok}
+- Produsen/supplier: ${shopProdusenInfo}
 
 ABSENSI & GAJI: ${gajiAbsensi}
 
@@ -435,7 +435,7 @@ function aiErrorHint(provider,status){
 if(provider==='gemini')return(status===400||status===403)?' (cek API key di Pengaturan)':'';
 return status===401?' (API key salah/expired, cek di Pengaturan)':'';
 }
-// Advisor — pengatur tab utk card gabungan "🧭 Penasihat" (v124, kw80-absensi-pending-badge-avg-gaji-fincoach):
+// Advisor — pengatur tab utk card gabungan "🧭 Penasihat" (v124, kw83-test-pengaturan-search-3):
 // dulu FinCoach ("🩺 Insight Cepat", rule-based-gratis-instan) & AIWidget ("🔍 Laporan AI",
 // panggil Claude/Gemini, wajib API key) tampil sbg 2 card TERPISAH di Dashboard — sekarang
 // digabung jadi SATU card dgn 2 tab, supaya tidak terasa ada "2 penasihat AI" yang mirip2.
@@ -470,11 +470,11 @@ const exp=txM.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
 const accInfo=D.accounts.map(a=>`${escapeHtml(a.name)}: ${fmtFull(recalcAccBalance(a.id))}`).join(', ')||'Belum ada akun';
 let netWorth=0;
 try{ netWorth=totalSaldoAkun()+totalAssetValue()-((D.pajakZakat&&D.pajakZakat.utangJT)||0)-totalDebtValue()-totalCicilanOutstanding(); }catch(e){}
-const cobekOmzet=D.cobek.reduce((s,t)=>s+(t.total||0),0);
-const cobekProfit=D.cobek.reduce((s,t)=>s+(t.profit||0),0);
-const cobekThisMonth=D.cobek.filter(t=>{const d=new Date(t.date);return d.getMonth()===m&&d.getFullYear()===y;});
-const cobekOmzetBulan=cobekThisMonth.reduce((s,t)=>s+(t.total||0),0);
-const cobekProfitBulan=cobekThisMonth.reduce((s,t)=>s+(t.profit||0),0);
+const shopOmzet=D.cobek.reduce((s,t)=>s+(t.total||0),0);
+const shopProfit=D.cobek.reduce((s,t)=>s+(t.profit||0),0);
+const shopThisMonth=D.cobek.filter(t=>{const d=new Date(t.date);return d.getMonth()===m&&d.getFullYear()===y;});
+const shopOmzetBulan=shopThisMonth.reduce((s,t)=>s+(t.total||0),0);
+const shopProfitBulan=shopThisMonth.reduce((s,t)=>s+(t.profit||0),0);
 const whThisMonth=D.workDays.filter(w=>{const d=new Date(w.date);return d.getMonth()===m&&d.getFullYear()===y;});
 const gajiBulan=whThisMonth.reduce((s,w)=>s+(w.total||0),0);
 // v179: total gaji minggu ini dihitung dari Absensi (D.workDays, in/out harian) — BUKAN dari
@@ -537,7 +537,7 @@ const totalAset=totalAssetValue();
 asetInfo=`Total ${fmtFull(totalAset)} dari ${D.assets.length} aset (${D.assets.map(a=>a.name+' '+fmtFull(a.nilai)).join(', ')})`;
 }
 }catch(e){}
-return{m,y,inc,exp,accInfo,netWorth,cobekOmzet,cobekProfit,cobekOmzetBulan,cobekProfitBulan,gajiBulan,whCount:whThisMonth.length,gajiMinggu,whCountMinggu,avgGajiMingguan,gajiMingguanHistCount,fiInfo,debtInfo,billInfo,budgetInfo,lifeBalanceInfo,targetInfo,asetInfo};
+return{m,y,inc,exp,accInfo,netWorth,shopOmzet,shopProfit,shopOmzetBulan,shopProfitBulan,gajiBulan,whCount:whThisMonth.length,gajiMinggu,whCountMinggu,avgGajiMingguan,gajiMingguanHistCount,fiInfo,debtInfo,billInfo,budgetInfo,lifeBalanceInfo,targetInfo,asetInfo};
 },
 buildSystemPrompt(c){
 return `Kamu adalah PENASIHAT KEUANGAN, BISNIS & INVESTASI, sekaligus WORK-LIFE COACH pribadi untuk ${D.profile.nama||'pengguna'} (pakai data aplikasi keuangan keluarga miliknya).
@@ -564,9 +564,9 @@ DATA BULAN ${c.m+1}/${c.y}:
 - Anggaran bulan ini: ${c.budgetInfo}
 - Kebebasan Finansial (FI): ${c.fiInfo}
 
-BISNIS SHOP (batu cobek PO system):
-- All-time: omzet ${fmtFull(c.cobekOmzet)}, untung ${fmtFull(c.cobekProfit)}
-- Bulan ini: omzet ${fmtFull(c.cobekOmzetBulan)}, untung ${fmtFull(c.cobekProfitBulan)}
+BISNIS SHOP (batu shop PO system):
+- All-time: omzet ${fmtFull(c.shopOmzet)}, untung ${fmtFull(c.shopProfit)}
+- Bulan ini: omzet ${fmtFull(c.shopOmzetBulan)}, untung ${fmtFull(c.shopProfitBulan)}
 
 ASET & INVESTASI: ${c.asetInfo}
 
@@ -1395,9 +1395,9 @@ if(txHits.length)groups.push({title:'💸 Transaksi',page:'keuangan',items:txHit
 const billHits=D.bills.filter(b=>(b.name||'').toLowerCase().includes(q)).slice(0,8);
 if(billHits.length)groups.push({title:'🧾 Tagihan/Cicilan/Langganan',page:'keuangan',items:billHits.map(b=>({label:b.name,sub:`Jatuh tempo ${b.nextDue} · ${b.freq}`,amount:fmt(b.amount)}))});
 const prodHits=D.products.filter(p=>(p.name||'').toLowerCase().includes(q)).slice(0,8);
-if(prodHits.length)groups.push({title:'🪨 Produk Shop',page:'cobek',items:prodHits.map(p=>({label:p.name,sub:`Stok ${p.stock}`,amount:fmt(p.hargaJual)}))});
-const cobekHits=D.cobek.filter(t=>t.customer&&(t.customer.name||'').toLowerCase().includes(q)).slice(0,8);
-if(cobekHits.length)groups.push({title:'🛒 Transaksi Shop',page:'cobek',items:cobekHits.map(t=>({label:t.customer.name,sub:t.date,amount:fmt(t.total)}))});
+if(prodHits.length)groups.push({title:'🪨 Produk Shop',page:'shop',items:prodHits.map(p=>({label:p.name,sub:`Stok ${p.stock}`,amount:fmt(p.hargaJual)}))});
+const shopHits=D.cobek.filter(t=>t.customer&&(t.customer.name||'').toLowerCase().includes(q)).slice(0,8);
+if(shopHits.length)groups.push({title:'🛒 Transaksi Shop',page:'shop',items:shopHits.map(t=>({label:t.customer.name,sub:t.date,amount:fmt(t.total)}))});
 const servisHits=D.servisLogs.filter(s=>(s.item||'').toLowerCase().includes(q)||(s.note||'').toLowerCase().includes(q)).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
 if(servisHits.length)groups.push({title:'🔧 Catatan Servis',page:'carnotes',items:servisHits.map(s=>({label:s.item,sub:s.date,amount:fmt(s.cost)}))});
 const bbmHits=D.bbmLogs.filter(b=>(b.spbu||'').toLowerCase().includes(q)||(b.note||'').toLowerCase().includes(q)).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
@@ -1558,7 +1558,7 @@ workDays:[
 {key:'gajiHariInput',type:'number'},
 ],
 };
-const SHEETS_MODULES=['transactions','cobek','bbmLogs','servisLogs','kmLogs','partsStock','products','bills','targets','eduFunds','workDays'];
+const SHEETS_MODULES=['transactions','shop','bbmLogs','servisLogs','kmLogs','partsStock','products','bills','targets','eduFunds','workDays'];
 function sheetsColLetter(n){
 let s='';
 while(n>0){ const m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26); }

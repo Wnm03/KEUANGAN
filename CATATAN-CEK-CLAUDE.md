@@ -13,6 +13,91 @@
 
 ## SUDAH SELESAI (terverifikasi)
 
+- ✅ **[2026-07-11] Redesign tampilan kartu produk Etalase (tab Bisnis Shop → Etalase) jadi lebih profesional.**
+  Sebelumnya kartu produk pakai layout generik `.tx-item` (sama seperti baris riwayat
+  transaksi biasa). Sekarang pakai layout khusus `.shop-product-card` (di `styles.css`):
+  - Badge stok berwarna sesuai level: 🔴 "Menipis" (≤2 pcs), 🟡 "Terbatas" (≤5 pcs),
+    🟢 "Aman" (>5 pcs), plus garis aksen warna di sisi kiri kartu.
+  - Tag kategori & produsen sbg pill terpisah (bukan teks digabung dgn "·").
+  - Blok harga jelas: kalau produk punya "Diskon Default %" (field `pDiskon` yang
+    sudah ada di form produk), harga normal dicoret & harga final + persen diskon
+    ditonjolkan warna aksen; kalau tidak ada diskon, tampil harga jual polos.
+    Harga modal & harga reseller tetap sbg info sekunder di bawahnya.
+  - Badge margin (nominal + persen) & tombol edit/hapus dikelompokkan rapi di kanan.
+  Perubahan di `cobek.js` (`Etalase.renderList()`), `styles.css` (kelas baru
+  `.shop-product-*`), dan `index.html`/`app_production.html` (wrapper `#productList`
+  dapat class `shop-product-grid`). Test baru ditambahkan di `tests/cobek.test.js`
+  (badge stok per level, tampilan diskon vs tanpa diskon) — total 969 test, semua
+  pass. Diverifikasi visual via Playwright + Chrome headless (screenshot tab Etalase
+  dgn data produk contoh, termasuk smoke-test bawaan app tetap ✅ OK). Build dijalankan
+  ulang (`node build.js`) sampai versi v187, bundle `app-bundle-a/b.min.js` &
+  `index.html`/`app_production.html`/`sw.js` sudah konsisten di v187.
+  **Belum dikerjakan (permintaan berikutnya dari user):** redesign POS Kasir, dan
+  widget AI rekomendasi harga jual/reseller yang menghitung ongkos transport
+  berdasarkan rute nyata (produsen → Pekalongan → konsumen, atau ambil di rumah)
+  — saat ini `PriceReko.autoFillTransport()` masih pakai rata-rata Rp/liter dari
+  log BBM tanpa memperhitungkan jarak/rute.
+
+- ✅ **[2026-07-11] `cobek.js` — test suite (102 test) disesuaikan dgn rebranding "Cobek"→"Shop".**
+  Sejak v163/v164, banyak identifier/DOM-id di `cobek.js` di-rename dari
+  awalan `Cobek`/`cobek` jadi `Shop`/`shop` (mis. `resolveCobekKategori`→
+  `resolveShopKategori`, `recordCobekSale`→`recordShopSale`, `renderCobek`→
+  `renderShop`, id `cobekList`→`shopList`, `#page-cobek`→`#page-shop`, dst
+  — murni rename, TIDAK ada perubahan logika/behavior, diverifikasi lewat
+  `diff` baris-per-baris). Data layer TIDAK berubah: `D.cobek`,
+  `D.cobekKategori`, dan properti `cobekLinkId` tetap memakai nama lama,
+  begitu juga label `subcategory:'Cobek'` di transaksi. `tests/cobek.test.js`
+  diupdate mengikuti mapping rename ini (78 token diverifikasi cocok satu-
+  satu ke source baru). Dijalankan via `node --test tests/*.test.js`: 966
+  test, semua pass, tidak ada regresi di file lain.
+
+- ✅ **[2026-07-11] Bug: tombol "💰 Sudah Gajian?" SELALU reset minggu SEKARANG, walau user
+  lagi browse ke minggu LAMA yang pending** (build #182). Ditemukan langsung dari pertanyaan
+  user "absensi pending dimana lihat & dimana konfirmnya" — ternyata notif pending (fitur
+  sebelumnya) mengarahkan user ke tombol yang secara diam-diam SELALU pakai `new Date()` utk
+  hitung rentang minggu, bukan minggu yang sedang ditampilkan di layar (`Payroll.weekStart`,
+  diubah via panah ‹ › di atas Riwayat Absensi). Akibatnya: notif pending tidak pernah bisa
+  benar-benar diselesaikan lewat tombol itu — yang ke-reset/dicatat selalu minggu sekarang
+  (kosong/salah), minggu lama yang dimaksud tetap nyangkut selamanya.
+  **Fix** (`reset-gaji-mingguan.js`): `openWeeklyResetManual()` sekarang pakai `Payroll.weekStart`
+  (fallback ke minggu real sekarang kalau modul Payroll belum termuat) sbg target rentang minggu,
+  simpan ke `_wrLastStart`/`_wrLastEnd` (baru). `confirmWeeklyReset()` pakai `_wrLastStart`/
+  `_wrLastEnd` yang sudah "dikunci" saat modal dibuka (bukan hitung ulang `new Date()`) — supaya
+  konsisten dgn minggu yang ditampilkan ke user & aman dari race condition tanggal berganti persis
+  saat modal terbuka. `checkWeeklySalaryReset()` (prompt otomatis tiap Sabtu) tetap pakai minggu
+  real sekarang seperti semula (memang scope-nya cuma minggu berjalan), tapi ikut isi
+  `_wrLastStart`/`_wrLastEnd` supaya konsisten.
+  **Cara pakai sekarang (untuk user):** buka 📅 Absensi & Kalkulator Gaji Harian → tab Absensi →
+  pakai panah ‹ › di atas "Riwayat Absensi" utk browse ke minggu yang pending (sesuai yg disebut
+  di notif ⚠️) → kalau minggu itu ada isinya, tombol "💰 Sudah Gajian? Catat & Reset Minggu Ini"
+  otomatis muncul di bawah ringkasan gaji minggu itu → tap → konfirmasi di modal "Sabtu Gajian!".
+  `npm test` → 821/821 pass (1 test toast text sempat berubah krn typo saya sendiri, sudah
+  dikembalikan persis semula agar tidak perlu ubah test). `node build.js` → sukses, versi naik
+  ke 182. Lint & smoke-test browser BELUM dijalankan sesi ini (sandbox tanpa Chrome/Playwright).
+
+- ✅ **[2026-07-11] Fitur Absensi: field "Tambahan Lain-lain (Rp)" + notif pending bisa di-dismiss**
+  (build #181). 2 temuan dari user (lewat screenshot form Absensi):
+  1. Form Absensi cuma punya field "Potongan Lain-lain", tidak ada lawannya untuk nominal
+     tambahan (bonus/uang makan/dsb). **Fix:** tambah field `whTambahan` (mirror field
+     Potongan) di `modals.js`, dibaca & dimasukkan ke rumus total di `payroll-absensi.js`
+     (`total = pokok+lembur+tambahan-potongan`, berlaku di cabang jam biasa & borongan),
+     disimpan sebagai `w.tambahan` di `D.workDays`, tampil di breakdown ringkasan gaji
+     mingguan & di tiap item Riwayat Absensi, dan ikut ke-load/reset saat edit/batal-edit.
+  2. Notif "⚠️ Ada absensi dari N minggu sebelumnya..." di atas Riwayat Absensi cuma teks HTML
+     tanpa cara ditutup — muncul terus tiap buka Absensi walau user sudah paham. **Fix:**
+     tambah tombol ✕ (`Payroll.dismissPendingOldWeeksBox`) yang menyimpan `weekStart` minggu
+     yang lagi ditampilkan ke `D.payrollDismissedWeeks` (baru, default `[]`, migrasi di
+     `features-helpers-global-security.js`). Box notif (`renderPendingOldWeeksBox`) sekarang
+     pakai `pendingOldWeeksInfoVisible()` yang memfilter minggu ter-dismiss; badge status di
+     Dashboard (`renderDashMini`) TETAP pakai `pendingOldWeeksInfo()` mentah (tidak ikut
+     ke-filter) supaya status asli tidak disembunyikan permanen — kalau ada minggu pending
+     BARU yang menumpuk lagi, notif otomatis muncul lagi (dismiss bukan "matikan selamanya").
+  **Belum ada test otomatis ditambahkan** — `payroll-absensi.js` termasuk daftar nol-test
+  yang belum digarap (lihat `FILE-MAP.md`). `npm test` → 821/821 pass (tidak ada yang berubah,
+  murni menambah kode baru yang belum ada test-nya). `node build.js` → sukses, versi naik ke
+  181. Lint & smoke-test browser BELUM dijalankan sesi ini (sandbox tanpa Chrome/Playwright
+  saat itu) — perlu diverifikasi visual sebelum dianggap 100% selesai.
+
 - ✅ **[2026-07-11] Test `reset-gaji-mingguan.js`** (lanjutan daftar nol-test
   ringan→berat, setelah `profil-pengaturan.js`). File 86 baris: `getWeekRange`
   (rentang minggu Minggu-Sabtu), `checkWeeklySalaryReset` (deteksi hari Sabtu

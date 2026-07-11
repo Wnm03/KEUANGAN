@@ -11,7 +11,7 @@
 > file tapi lupa `node build.js`), jalankan ulang generatornya, JANGAN diedit
 > tangan — editan manual bakal ketimpa lagi di build berikutnya.
 
-Terakhir digenerate: 2026-07-11T09:12:07.135Z
+Terakhir digenerate: 2026-07-11T12:30:25.778Z
 Total file source: 50 · Total identifier global: 857
 
 ## 1. Urutan load & ringkasan tiap file
@@ -24,7 +24,7 @@ bundler menggabungkan semua file jadi `app-bundle-a.min.js`/`app-bundle-b.min.js
 | 1 | `modules-render.js` | 1389 | Fungsi render (85 fungsi) dipisah dari app_production.html untuk pemerataan ukuran file. Semua fungsi ini murni definisi function global (bukan module), jadi tetap bisa dipanggil dari file manapun yang loadnya … |
 | 2 | `modals.js` | 7 | Modal HTML dipisah dari app_production.html untuk pemerataan ukuran file. Setiap elemen array persis sama dengan blok <div class="overlay" id="...">...</div> aslinya, di-inject balik ke posisi yang sama persis via … |
 | 3 | `modules-calc.js` | 856 | _(tidak ada komentar header)_ |
-| 4 | `cobek.js` | 1262 | Domain Cobek: etalase/stok produk, produsen, order pelanggan, laporan omzet, data pelanggan, widget dashboard "🤖 Rekomendasi Harga Jual AI" (PriceRekoWidget, kw73) & "📦 Rekomendasi Restock AI" (StockRekoWidget, kw74) … |
+| 4 | `cobek.js` | 1287 | Domain Shop: etalase/stok produk, produsen, order pelanggan, laporan omzet, data pelanggan, widget dashboard "🤖 Rekomendasi Harga Jual AI" (PriceRekoWidget, kw73) & "📦 Rekomendasi Restock AI" (StockRekoWidget, kw74) — … |
 | 5 | `kasir.js` | 222 | Modul "🧠 Kasir AI" (v127, kw81-kasir-ai-pos): Tab checkout BARU utk halaman Bisnis Shop yang lebih cepat dari form "Transaksi Manual" (Order) lama: tap produk langsung dari grid (bukan pilih dari dropdown lalu klik "+ … |
 | 6 | `piutang-utang.js` | 352 | Domain Piutang & Utang: catatan piutang (uang dipinjamkan), utang (uang dipinjam) beserta status lunas/cicilan, dan DebtStrategy (simulasi strategi pelunasan Avalanche/Snowball). Juga berisi Bill (helper hubungkan … |
 | 7 | `pajak-pbb-zakat.js` | 343 | Kalkulator Pajak Bumi & Bangunan (PBB), Zakat (penghasilan, maal, fitrah), Referensi AI (cek harga emas/nisab via AI), Pajak UMKM, dan PPh 21 (Orang Pribadi) Dipisah dari: features-renovasi-pajak-aset-order.js (PBB, … |
@@ -36,8 +36,8 @@ bundler menggabungkan semua file jadi `app-bundle-a.min.js`/`app-bundle-b.min.js
 | 13 | `renovasi.js` | 438 | Domain Proyek Renovasi: RenovCalc (kalkulator material), Renov (proyek & item biaya), RenovAI (saran AI kebutuhan/ukuran) CATATAN: modul-modul ini dipindah ke file baru ini dari features-renovasi-pajak-aset-order.js … |
 | 14 | `aset.js` | 351 | Domain Aset & Kekayaan: ALOKASI_PRESETS/AlokasiAset (rekomendasi alokasi dana), Aset (Buku Aset & Kekayaan Bersih), IDBStore (helper generik penyimpanan IndexedDB), PORTFOLIO_LABELS, TimelineW (timeline tujuan keuangan) … |
 | 15 | `worthit.js` | 468 | Domain Worth It? & Prioritas Belanja: cek kondisi keuangan sebelum belanja + daftar prioritas barang yang mau dibeli CATATAN: modul WorthIt dipindah ke file baru ini dari features-renovasi-pajak-aset-order.js (v62). … |
-| 16 | `data-default.js` | 36 | Domain Data Default: kategori cobek bawaan (DEFAULT_COBEK_KATEGORI), akun keuangan bawaan (DEFAULT_ACCOUNTS), kategori sparepart kendaraan bawaan (DEFAULT_SPAREPARTS). PENTING: file ini HARUS dimuat SEBELUM … |
-| 17 | `features-helpers-global-security.js` | 457 | Helper global (migrasi data, state D, save/load, event dispatcher) CATATAN: 3 konstanta default (DEFAULT_COBEK_KATEGORI/DEFAULT_ACCOUNTS/DEFAULT_SPAREPARTS) dipindah ke data-default.js (v79) — file itu HARUS dimuat … |
+| 16 | `data-default.js` | 36 | Domain Data Default: kategori shop bawaan (DEFAULT_COBEK_KATEGORI), akun keuangan bawaan (DEFAULT_ACCOUNTS), kategori sparepart kendaraan bawaan (DEFAULT_SPAREPARTS). PENTING: file ini HARUS dimuat SEBELUM … |
+| 17 | `features-helpers-global-security.js` | 458 | Helper global (migrasi data, state D, save/load, event dispatcher) CATATAN: 3 konstanta default (DEFAULT_COBEK_KATEGORI/DEFAULT_ACCOUNTS/DEFAULT_SPAREPARTS) dipindah ke data-default.js (v79) — file itu HARUS dimuat … |
 | 18 | `diagnostik-versi.js` | 77 | Domain Diagnostik & Sinkronisasi Versi: snapshot HTML utk self-test (getHtmlSnapshotForSelfTest), cek status sinkron versi produksi vs master (computeProductionSyncStatus), cek status sinkron versi antar file modul … |
 | 19 | `format-tema.js` | 34 | Domain Format Angka & Tema: format rupiah singkat (fmt, mis. "Rp 1.5 jt"), format rupiah penuh (fmtFull/fmtFullSigned), notifikasi toast di bawah layar (toast), dan ganti/terapkan tema warna app termasuk mode "auto" … |
 | 20 | `error-handler.js` | 38 | Domain Error Handler Global: tangkap error tak tertangani (uncaught error & unhandled promise rejection) di seluruh app, catat ke console utk debugging, dan tampilkan toast singkat yang ramah ke pengguna (dibatasi … |
@@ -45,7 +45,7 @@ bundler menggabungkan semua file jadi `app-bundle-a.min.js`/`app-bundle-b.min.js
 | 22 | `keamanan-pin.js` | 205 | Domain Keamanan: layar PIN (showPinScreen/checkPin/pinPress/pinBack/updatePinDots), lockout percobaan PIN salah (PIN_MAX_ATTEMPTS/PIN_LOCK_DURATIONS_SEC/updatePinLockUI/dst), ganti PIN (gantiPin), dan enkripsi API key … |
 | 23 | `refleksi-selfcare.js` | 255 | Domain Refleksi & Self-Care: Jurnal Syukur, Checklist Self-Care harian (dgn hitung konsisten berturut-turut), & Catatan Privat terenkripsi (pakai PIN aplikasi, skema kripto sama dgn … |
 | 24 | `modal-navigasi.js` | 285 | Domain Modal Generik & Navigasi Halaman: modal konfirmasi/prompt/pilihan/info/pin (askConfirm/showPromptModal/showChoiceModal/showAlertModal/showPinPromptModal & pasangan _xxxAnswer/_xxxSubmit-nya), buka/tutup modal & … |
-| 25 | `reset-gaji-mingguan.js` | 90 | Domain Reset Gaji Mingguan: hitung rentang minggu berjalan (getWeekRange), deteksi & tawarkan reset absensi tiap Sabtu (checkWeeklySalaryReset), buka modal reset manual (openWeeklyResetManual), dan proses konfirmasi … |
+| 25 | `reset-gaji-mingguan.js` | 102 | Domain Reset Gaji Mingguan: hitung rentang minggu berjalan (getWeekRange), deteksi & tawarkan reset absensi tiap Sabtu (checkWeeklySalaryReset), buka modal reset manual (openWeeklyResetManual), dan proses konfirmasi … |
 | 26 | `debug-console.js` | 49 | Domain Debug Console: toggle tombol status (updateDebugConsoleBtn) & aktifkan/matikan panel debug pihak ketiga "eruda" (toggleDebugConsole), termasuk lazy-load skrip eruda dari CDN kalau belum pernah dipakai. Dipindah … |
 | 27 | `pengaturan-search.js` | 73 | Domain Pencarian Pengaturan: buka/tutup grup pengaturan (toggleStgGroup), cari & sorot kartu pengaturan yang cocok teks pencarian (stgSearch), dan dukungan keyboard (Enter/Spasi) utk buka grup pengaturan lewat kepala … |
 | 28 | `onboarding.js` | 41 | Domain Onboarding: preview perkiraan kasar gaji/kiriman saat setup awal (updateOnboardPreview) & proses selesai onboarding — simpan profil awal + PIN (finishOnboard). Dipindah dari features-helpers-global-security.js … |
@@ -58,17 +58,17 @@ bundler menggabungkan semua file jadi `app-bundle-a.min.js`/`app-bundle-b.min.js
 | 35 | `tx-bbm.js` | 93 | logika panel "Sinkron ke Catatan Mobil (BBM)" pada txModal (Tambah/Edit Transaksi Keuangan). Dipisah dari transaksi.js (2026-07-11, lihat CLAUDE.md catatan kerja "split transaksi.js" bagian ke-6) murni sebagai … |
 | 36 | `tx-stok-sparepart.js` | 73 | logika panel "Tambah ke Stok Sparepart juga?" pada txModal (Tambah/Edit Transaksi Keuangan). Dipisah dari transaksi.js (2026-07-11, lihat CLAUDE.md catatan kerja "split transaksi.js" bagian ke-7) murni sebagai … |
 | 37 | `tx-transfer.js` | 33 | logika modal "⇄ Transfer Antar Akun" (transferModal). Dipisah dari transaksi.js (2026-07-11, lihat CLAUDE.md catatan kerja "split transaksi.js" bagian ke-8) murni sebagai pengelompokan ulang file, BUKAN perubahan … |
-| 38 | `tx-cobek.js` | 29 | domain "Stok/Penjualan Cobek (Shop)" pada form Transaksi. Dipindah dari transaksi.js (lihat CLAUDE.md catatan kerja "split transaksi.js" bagian ke-9) -- tetap fungsi global, tetap dipanggil persis sama dari sini … |
+| 38 | `tx-cobek.js` | 29 | domain "Stok/Penjualan Shop (Shop)" pada form Transaksi. Dipindah dari transaksi.js (lihat CLAUDE.md catatan kerja "split transaksi.js" bagian ke-9) -- tetap fungsi global, tetap dipanggil persis sama dari sini … |
 | 39 | `tx-target.js` | 68 | domain "Target Tabungan" (modal tambah target, deteksi Dana Darurat, simpan, lihat transaksi akun terkait, tambah/hapus progres). Dipindah dari transaksi.js (lihat CLAUDE.md catatan kerja "split transaksi.js" bagian … |
 | 40 | `tx-list-cashflow.js` | 160 | domain "List Transaksi (kartu tx, hapus tx), filter periode Keuangan/Laporan, & Cashflow Forecast". Dipindah dari transaksi.js (lihat CLAUDE.md catatan kerja "split transaksi.js" bagian ke-11 -- lanjutan bagian … |
-| 41 | `transaksi.js` | 745 | Form Tambah/Edit Transaksi Keuangan: autocomplete kategori/produk, panel kendaraan (BBM/sparepart/stok cobek), target Dana Darurat, catatan/reminder/ transfer, dan simpan transaksi (saveTx) — mesin utama halaman … |
+| 41 | `transaksi.js` | 745 | Form Tambah/Edit Transaksi Keuangan: autocomplete kategori/produk, panel kendaraan (BBM/sparepart/stok shop), target Dana Darurat, catatan/reminder/ transfer, dan simpan transaksi (saveTx) — mesin utama halaman … |
 | 42 | `profil-pengaturan.js` | 82 | Profil pengguna di Pengaturan: auto-save profil, status PTKP (kawin/tanggungan/pekerjaan) utk estimasi PPh21, preview usia, hint API key AI PENTING: file ini HARUS dimuat sesuai urutan build.js (GROUP_A/GROUP_B) karena … |
 | 43 | `kategori.js` | 168 | Modal Kategori & Subkategori (tambah/edit/hapus, filter tampilan) PENTING: file ini HARUS dimuat sesuai urutan build.js (GROUP_A/GROUP_B) karena beberapa modul saling referensi. Urutan grup ini: data-default.js, … |
 | 44 | `kategorisasi-ai.js` | 186 | AI Auto-Kategorisasi Transaksi dari Catatan Bebas FITUR BARU: saat user mengetik Keterangan transaksi bebas di Input Transaksi (mis. "bayar galon+beras warung"), modul ini menebak Kategori & Subkategori yang paling … |
 | 45 | `tagihan-kalender.js` | 444 | Modul Tagihan/Bill (CRUD, riwayat, filter, arsip) & Kalender Jatuh Tempo PENTING: file ini HARUS dimuat sesuai urutan build.js (GROUP_A/GROUP_B) karena beberapa modul saling referensi. Urutan grup ini: data-default.js, … |
 | 46 | `backup-restore.js` | 719 | Export/import/backup data (satu domain penuh: CSV/JSON export laporan, backup terjadwal & manual per-modul, restore dari file backup, import dari Cashew/CSV lain, import Car Notes) (v89): blok "deteksi item checkout … |
-| 47 | `payroll-absensi.js` | 413 | Payroll: Absensi Harian & Kalkulator Gaji Mingguan (const Payroll={...}) (v93): dipindah dari backup-restore.js — domain ini sudah rapi sbg 1 objek modul (mirip LinkTx/Renov/Aset), jadi dipisah jadi file domain sendiri, … |
-| 48 | `features-tukang-kendaraan-storage.js` | 1769 | Dana darurat, keuangan/laporan/grafik, budget, cobek grafik, cashflow forecast, target CATATAN: Sparepart (kategori & stok sparepart kendaraan) DIPINDAH ke sini dari features-etalase-piutang-renovai.js (sesi pemisahan … |
+| 47 | `payroll-absensi.js` | 449 | Payroll: Absensi Harian & Kalkulator Gaji Mingguan (const Payroll={...}) (v93): dipindah dari backup-restore.js — domain ini sudah rapi sbg 1 objek modul (mirip LinkTx/Renov/Aset), jadi dipisah jadi file domain sendiri, … |
+| 48 | `features-tukang-kendaraan-storage.js` | 1769 | Dana darurat, keuangan/laporan/grafik, budget, shop grafik, cashflow forecast, target CATATAN: Sparepart (kategori & stok sparepart kendaraan) DIPINDAH ke sini dari features-etalase-piutang-renovai.js (sesi pemisahan … |
 | 49 | `features-aiwidget-reminder-gdrive-search.js` | 1612 | Reminder, hari kerja, kendaraan (pajak/SIM/servis/BBM/sparepart), storage & arsip, skema Google Sheets (SHEETS_SCHEMAS/SHEETS_MODULES) CATATAN: SHEETS_SCHEMAS dipindah dari features-edukasi-pajak-utang-sewakios.js (v57) … |
 | 50 | `features-sheets-pwa-selftest.js` | 2367 | Settings, notifikasi, PWA setup, self-test/smoke-test rendering, pajak/zakat/aset/utang PENTING: file ini HARUS dimuat sesuai urutan build.js (GROUP_A/GROUP_B) karena beberapa modul saling referensi. Urutan grup ini: … |
 
@@ -139,20 +139,20 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `_writeLocalSnapshot` | `features-helpers-global-security.js` |
 | `_wrLastTotal` | `reset-gaji-mingguan.js` |
 | `acBillNames` | `transaksi.js` |
-| `acCobekCustomers` | `cobek.js` |
 | `acProductNames` | `transaksi.js` |
 | `acProdusenNames` | `transaksi.js` |
+| `acShopCustomers` | `cobek.js` |
 | `acSparepartCatCodes` | `transaksi.js` |
 | `acSparepartCatNames` | `transaksi.js` |
 | `acSpbuNames` | `transaksi.js` |
 | `acStockCodes` | `transaksi.js` |
 | `acStockNames` | `transaksi.js` |
 | `acTxNotes` | `transaksi.js` |
-| `addCobekStockCartItem` | `cobek.js` |
 | `addNewCatFromInput` | `transaksi.js` |
 | `addOrderItem` | `cobek.js` |
+| `addShopStockCartItem` | `cobek.js` |
 | `addTarget` | `tx-target.js` |
-| `addTxCobekSaleCartItem` | `cobek.js` |
+| `addTxShopSaleCartItem` | `cobek.js` |
 | `addWorkDay` | `payroll-absensi.js` |
 | `Advisor` | `features-aiwidget-reminder-gdrive-search.js` |
 | `aggregateCustomers` | `cobek.js` |
@@ -173,8 +173,8 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `applyQuickScan` | `scan-ocr.js` |
 | `applyStockUsage` | `features-tukang-kendaraan-storage.js` |
 | `applyTxBbmFromTx` | `tx-bbm.js` |
-| `applyTxCobekSaleFromTx` | `cobek.js` |
-| `applyTxCobekStockFromTx` | `cobek.js` |
+| `applyTxShopSaleFromTx` | `cobek.js` |
+| `applyTxShopStockFromTx` | `cobek.js` |
 | `applyTxStockFromTx` | `tx-stok-sparepart.js` |
 | `ARCHIVE_MODULES` | `features-tukang-kendaraan-storage.js` |
 | `archiveAvailableYears` | `features-tukang-kendaraan-storage.js` |
@@ -253,8 +253,6 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `closeCalc` | `kalkulator-input.js` |
 | `closeModal` | `modal-navigasi.js` |
 | `closeQS` | `modal-navigasi.js` |
-| `cobekKategoriName` | `cobek.js` |
-| `cobekOrderRowHTML` | `cobek.js` |
 | `codeFromName` | `features-tukang-kendaraan-storage.js` |
 | `commitCurKmEdit` | `features-tukang-kendaraan-storage.js` |
 | `computeCashflowForecast` | `tx-list-cashflow.js` |
@@ -266,7 +264,7 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `computeOrderTotals` | `cobek.js` |
 | `computeProductionSyncStatus` | `diagnostik-versi.js` |
 | `computeSelfTestResults` | `features-sheets-pwa-selftest.js` |
-| `computeTxCobekSaleTotals` | `cobek.js` |
+| `computeTxShopSaleTotals` | `cobek.js` |
 | `confirmChatAction` | `features-aiwidget-reminder-gdrive-search.js` |
 | `confirmWeeklyReset` | `reset-gaji-mingguan.js` |
 | `copyNavSmokeResults` | `features-sheets-pwa-selftest.js` |
@@ -274,10 +272,10 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `curBillHistoryId` | `tagihan-kalender.js` |
 | `curBillType` | `features-helpers-global-security.js` |
 | `curCatFilter` | `features-helpers-global-security.js` |
-| `curCobekStockCart` | `cobek.js` |
 | `curMonth` | `features-helpers-global-security.js` |
 | `curPayMethod` | `features-helpers-global-security.js` |
-| `curTxCobekSaleCart` | `cobek.js` |
+| `curShopStockCart` | `cobek.js` |
+| `curTxShopSaleCart` | `cobek.js` |
 | `curTxType` | `features-helpers-global-security.js` |
 | `curVehicleId` | `features-helpers-global-security.js` |
 | `customerKey` | `cobek.js` |
@@ -303,7 +301,6 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `delBill` | `tagihan-kalender.js` |
 | `delCat` | `kategori.js` |
 | `delCatFromModal` | `kategori.js` |
-| `delCobek` | `cobek.js` |
 | `deleteBbmFromModal` | `features-tukang-kendaraan-storage.js` |
 | `deleteBillHistoryTx` | `tagihan-kalender.js` |
 | `deleteBudget` | `features-budget-laporan-carnotes-pelanggan.js` |
@@ -313,6 +310,7 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `delProdusen` | `cobek.js` |
 | `delReminder` | `transaksi.js` |
 | `delServis` | `features-tukang-kendaraan-storage.js` |
+| `delShop` | `cobek.js` |
 | `delSim` | `features-tukang-kendaraan-storage.js` |
 | `delSparepart` | `features-tukang-kendaraan-storage.js` |
 | `delStock` | `features-tukang-kendaraan-storage.js` |
@@ -420,7 +418,6 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `getCatsByType` | `kategori.js` |
 | `getCicilanSharedMine` | `cicilan.js` |
 | `getCnRange` | `features-tukang-kendaraan-storage.js` |
-| `getCobekRange` | `cobek.js` |
 | `getCustomerOrders` | `cobek.js` |
 | `getEffectiveIntervalKm` | `features-tukang-kendaraan-storage.js` |
 | `getHtmlSnapshotForSelfTest` | `diagnostik-versi.js` |
@@ -434,6 +431,7 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `getSelectedBudgetCatIds` | `features-budget-laporan-carnotes-pelanggan.js` |
 | `getSelectedFiCatIds` | `modules-calc.js` |
 | `getSelfTestCases` | `features-sheets-pwa-selftest.js` |
+| `getShopRange` | `cobek.js` |
 | `getTxListRange` | `tx-list-cashflow.js` |
 | `getVehicleKm` | `features-tukang-kendaraan-storage.js` |
 | `getWeekRange` | `reset-gaji-mingguan.js` |
@@ -463,10 +461,10 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `inRange` | `backup-restore.js` |
 | `isAccLinkedToAsset` | `akun.js` |
 | `isBensinSubName` | `transaksi.js` |
-| `isCobekStockCatName` | `tx-cobek.js` |
 | `isDashCardOn` | `modules-render.js` |
 | `isDevMode` | `features-helpers-global-security.js` |
 | `isKendaraanCatName` | `transaksi.js` |
+| `isShopStockCatName` | `tx-cobek.js` |
 | `isSparepartSubName` | `transaksi.js` |
 | `jsAttrEscape` | `transaksi.js` |
 | `Kasir` | `kasir.js` |
@@ -485,11 +483,11 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `loadMoreServisList` | `features-tukang-kendaraan-storage.js` |
 | `loadMoreTx` | `filter-laporan.js` |
 | `markBillPaid` | `tagihan-kalender.js` |
-| `markCobekDelivered` | `cobek.js` |
+| `markShopDelivered` | `cobek.js` |
 | `markSparepartServiced` | `features-tukang-kendaraan-storage.js` |
 | `matchingVehicleName` | `features-tukang-kendaraan-storage.js` |
 | `maybeOfferPaylaterReminder` | `scan-ocr.js` |
-| `migrateCobekCategory` | `features-helpers-global-security.js` |
+| `migrateShopCategory` | `features-helpers-global-security.js` |
 | `MODAL_HTML` | `modals.js` |
 | `MODAL_VERSION` | `modals.js` |
 | `MODULE_CALC_VERSION` | `modules-calc.js` |
@@ -505,7 +503,6 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `onBackupPeriodeChange` | `backup-restore.js` |
 | `onBudgetCatChildToggle` | `features-budget-laporan-carnotes-pelanggan.js` |
 | `onBudgetCatTotalToggle` | `features-budget-laporan-carnotes-pelanggan.js` |
-| `onCobekCustFieldInput` | `cobek.js` |
 | `onCustomerInputChange` | `cobek.js` |
 | `onFiCatTotalToggle` | `modules-calc.js` |
 | `onFKatChange` | `filter-laporan.js` |
@@ -516,12 +513,13 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `onPProdusenChange` | `cobek.js` |
 | `onServisItemAutofillInterval` | `features-tukang-kendaraan-storage.js` |
 | `onServisPartChange` | `features-tukang-kendaraan-storage.js` |
+| `onShopCustFieldInput` | `cobek.js` |
 | `onTargetAccChange` | `tx-target.js` |
 | `onTargetDanaDaruratToggle` | `tx-target.js` |
 | `onTxCatInput` | `transaksi.js` |
-| `onTxCobekSaleItemChange` | `cobek.js` |
-| `onTxCobekStockItemChange` | `cobek.js` |
-| `onTxCobekStockProdusenChange` | `cobek.js` |
+| `onTxShopSaleItemChange` | `cobek.js` |
+| `onTxShopStockItemChange` | `cobek.js` |
+| `onTxShopStockProdusenChange` | `cobek.js` |
 | `onTxStockItemChange` | `tx-stok-sparepart.js` |
 | `onTxSubCatInput` | `transaksi.js` |
 | `openAbsensiModal` | `gaji-calc.js` |
@@ -593,8 +591,8 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `populateStockCatSelect` | `features-tukang-kendaraan-storage.js` |
 | `populateSubSelect` | `kategori.js` |
 | `populateTxBbmVehicleSelect` | `tx-bbm.js` |
-| `populateTxCobekSaleSelect` | `cobek.js` |
-| `populateTxCobekStockSelect` | `cobek.js` |
+| `populateTxShopSaleSelect` | `cobek.js` |
+| `populateTxShopStockSelect` | `cobek.js` |
 | `populateTxStockSelect` | `tx-stok-sparepart.js` |
 | `PORTFOLIO_LABELS` | `aset.js` |
 | `PriceReko` | `cobek.js` |
@@ -608,7 +606,7 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `recalcAccBalance` | `akun.js` |
 | `recentUniqueStrings` | `transaksi.js` |
 | `recordBbmLog` | `tx-bbm.js` |
-| `recordCobekSale` | `cobek.js` |
+| `recordShopSale` | `cobek.js` |
 | `RefAI` | `pajak-pbb-zakat.js` |
 | `Refleksi` | `refleksi-selfcare.js` |
 | `REFLEKSI_SELFCARE_ITEMS` | `refleksi-selfcare.js` |
@@ -616,9 +614,9 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `refreshCurrentPage` | `modal-navigasi.js` |
 | `refreshTxCatIfOpen` | `kategori.js` |
 | `rememberLastAccForCat` | `scan-ocr.js` |
-| `removeCobekStockCartItem` | `cobek.js` |
 | `removeOrderItem` | `cobek.js` |
-| `removeTxCobekSaleCartItem` | `cobek.js` |
+| `removeShopStockCartItem` | `cobek.js` |
+| `removeTxShopSaleCartItem` | `cobek.js` |
 | `renderAccGrid` | `modules-render.js` |
 | `renderActualStorageQuota` | `modules-render.js` |
 | `renderArchiveHistory` | `modules-render.js` |
@@ -636,10 +634,6 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `renderCatList` | `modules-render.js` |
 | `renderChatActionBubble` | `modules-render.js` |
 | `renderCnTab` | `modules-render.js` |
-| `renderCobek` | `cobek.js` |
-| `renderCobekGrafik` | `cobek.js` |
-| `renderCobekRecent` | `cobek.js` |
-| `renderCobekStockCartList` | `cobek.js` |
 | `renderCustomerList` | `cobek.js` |
 | `renderDashAccList` | `modules-render.js` |
 | `renderDashboard` | `modules-render.js` |
@@ -688,6 +682,10 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `renderServisReminder` | `modules-render.js` |
 | `renderSettings` | `modules-render.js` |
 | `renderSheetsSettings` | `modules-render.js` |
+| `renderShop` | `cobek.js` |
+| `renderShopGrafik` | `cobek.js` |
+| `renderShopRecent` | `cobek.js` |
+| `renderShopStockCartList` | `cobek.js` |
 | `renderSiapPulang` | `cobek.js` |
 | `renderSimLinkStatus` | `modules-render.js` |
 | `renderSimList` | `modules-render.js` |
@@ -696,7 +694,7 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `renderStockList` | `modules-render.js` |
 | `renderStorageUsage` | `modules-render.js` |
 | `renderTarget` | `modules-render.js` |
-| `renderTxCobekSaleCartList` | `cobek.js` |
+| `renderTxShopSaleCartList` | `cobek.js` |
 | `renderUMKMPajak` | `modules-render.js` |
 | `renderVehicleManageList` | `modules-render.js` |
 | `renderVehicleSelect` | `modules-render.js` |
@@ -713,14 +711,14 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `requestNotifPermission` | `features-aiwidget-reminder-gdrive-search.js` |
 | `resetApp` | `features-aiwidget-reminder-gdrive-search.js` |
 | `resetBillFilter` | `tagihan-kalender.js` |
-| `resetCobekStockCart` | `cobek.js` |
 | `resetKeuFilter` | `filter-laporan.js` |
 | `resetLaporanFilter` | `filter-laporan.js` |
 | `resetOcrWorker` | `scan-ocr.js` |
 | `resetPayMethodLock` | `transaksi.js` |
-| `resetTxCobekSaleCart` | `cobek.js` |
+| `resetShopStockCart` | `cobek.js` |
 | `resetTxPageAndRender` | `filter-laporan.js` |
-| `resolveCobekKategori` | `cobek.js` |
+| `resetTxShopSaleCart` | `cobek.js` |
+| `resolveShopKategori` | `cobek.js` |
 | `resolveVehicleTxCategory` | `transaksi.js` |
 | `revertStockUsage` | `features-tukang-kendaraan-storage.js` |
 | `RISKY_OPENER_SPECS` | `features-sheets-pwa-selftest.js` |
@@ -779,8 +777,8 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `selectBillCalDay` | `tagihan-kalender.js` |
 | `selectBudgetIcon` | `features-budget-laporan-carnotes-pelanggan.js` |
 | `selectBudgetPeriod` | `features-budget-laporan-carnotes-pelanggan.js` |
-| `selectCobekCustomer` | `cobek.js` |
 | `selectFiAssetScope` | `modules-calc.js` |
+| `selectShopCustomer` | `cobek.js` |
 | `selectSimpleAutocomplete` | `transaksi.js` |
 | `selectStatusKawin` | `profil-pengaturan.js` |
 | `selectStatusPekerjaan` | `profil-pengaturan.js` |
@@ -798,12 +796,12 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `setCatModalType` | `kategori.js` |
 | `setCnPeriode` | `features-tukang-kendaraan-storage.js` |
 | `setCnTab` | `features-tukang-kendaraan-storage.js` |
-| `setCobekPeriode` | `cobek.js` |
-| `setCobekTab` | `cobek.js` |
 | `setDashServisVehFilter` | `features-tukang-kendaraan-storage.js` |
 | `setKeuanganTab` | `tx-list-cashflow.js` |
 | `setPayMethod` | `transaksi.js` |
 | `setPeriode` | `tx-list-cashflow.js` |
+| `setShopPeriode` | `cobek.js` |
+| `setShopTab` | `cobek.js` |
 | `setTheme` | `format-tema.js` |
 | `setTxListPeriode` | `tx-list-cashflow.js` |
 | `setTxType` | `transaksi.js` |
@@ -831,6 +829,8 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `sheetsSaveSpreadsheetId` | `features-aiwidget-reminder-gdrive-search.js` |
 | `sheetsSyncNow` | `features-sheets-pwa-selftest.js` |
 | `sheetsTokenClient` | `features-sheets-pwa-selftest.js` |
+| `shopKategoriName` | `cobek.js` |
+| `shopOrderRowHTML` | `cobek.js` |
 | `showAlertModal` | `modal-navigasi.js` |
 | `showAllBudgetDrillDown` | `features-budget-laporan-carnotes-pelanggan.js` |
 | `showBudgetDrillDown` | `features-budget-laporan-carnotes-pelanggan.js` |
@@ -865,8 +865,8 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `syncTxAmtToLiter` | `tx-bbm.js` |
 | `syncTxAmtToLiterForce` | `tx-bbm.js` |
 | `syncTxBbmAmt` | `tx-bbm.js` |
-| `syncTxCobekSaleAmt` | `cobek.js` |
-| `syncTxCobekStockAmt` | `cobek.js` |
+| `syncTxShopSaleAmt` | `cobek.js` |
+| `syncTxShopStockAmt` | `cobek.js` |
 | `testNotif` | `features-aiwidget-reminder-gdrive-search.js` |
 | `TimelineW` | `aset.js` |
 | `timeToMinutes` | `payroll-absensi.js` |
@@ -890,8 +890,8 @@ bisa dipanggil sebagai "global" dari file manapun lewat bundel gabungan.
 | `toggleSingleCardCollapse` | `pengaturan-search.js` |
 | `toggleStgGroup` | `pengaturan-search.js` |
 | `toggleTxBbmFields` | `tx-bbm.js` |
-| `toggleTxCobekSaleFields` | `cobek.js` |
-| `toggleTxCobekStockFields` | `cobek.js` |
+| `toggleTxShopSaleFields` | `cobek.js` |
+| `toggleTxShopStockFields` | `cobek.js` |
 | `toggleTxStockFields` | `tx-stok-sparepart.js` |
 | `Torsi` | `features-budget-laporan-carnotes-pelanggan.js` |
 | `TORSI_DB` | `features-tukang-kendaraan-storage.js` |

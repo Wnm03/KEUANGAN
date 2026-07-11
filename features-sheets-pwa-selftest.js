@@ -678,7 +678,7 @@ const brutoExpected=parsePzNum(brutoEl.value),iuranExpected=parsePzNum(iuranEl.v
 _selfTestAssert(D.pajakZakat.pphBrutoBulan===brutoExpected,'pphBrutoBulan tersimpan harus ikut nilai field Penghasilan Bruto ('+brutoExpected+'), dapat '+D.pajakZakat.pphBrutoBulan);
 _selfTestAssert(D.pajakZakat.pphIuranBulan===iuranExpected,'pphIuranBulan tersimpan harus ikut nilai field Iuran Pensiun ('+iuranExpected+'), dapat '+D.pajakZakat.pphIuranBulan);
 }},
-{name:'renderUMKMPajak(): PPh Final UMKM = 0.5% dari omzet Cobek bulan ini', fn:()=>{
+{name:'renderUMKMPajak(): PPh Final UMKM = 0.5% dari omzet Shop bulan ini', fn:()=>{
 if(!document.getElementById('umkmOmzet'))return;
 renderUMKMPajak();
 const omzet=parsePzNum(document.getElementById('umkmOmzet').textContent);
@@ -808,7 +808,7 @@ D.renovProjects=D.renovProjects.filter(p=>p.id!==dummyProj.id);
 SewaKios.pendingUnitId=null;
 }
 }},
-{name:'Stok Sparepart (Cobek): tambah/hapus item tidak merusak D.partsStock (sementara, tidak disimpan)', fn:()=>{
+{name:'Stok Sparepart (Shop): tambah/hapus item tidak merusak D.partsStock (sementara, tidak disimpan)', fn:()=>{
 const before=D.partsStock.length;
 const dummy={id:'__selftest_stock__',name:'Tes Diagnostik',catId:null,code:'TEST-000',qty:5,unit:'pcs',minStock:1,price:1000,note:''};
 D.partsStock.push(dummy);
@@ -971,21 +971,21 @@ try{ CHAT_ACTION_HANDLERS.add_catatan_anak({text:'   '}); }catch(e){ threw=true;
 _selfTestAssert(threw,'add_catatan_anak harus menolak teks kosong');
 _selfTestAssert(D.transactions.length===beforeTx&&D.bills.length===beforeBills&&(D.catatan.anak||[]).length===beforeAnak,'Validasi yang gagal TIDAK boleh menyisipkan data apa pun ke D');
 }},
-{name:'runDataHealthCheck(): mendeteksi transaksi Cobek dengan produk terhapus & absensi dengan total tidak valid (sementara, dicadangkan & dikembalikan)', fn:()=>{
+{name:'runDataHealthCheck(): mendeteksi transaksi Shop dengan produk terhapus & absensi dengan total tidak valid (sementara, dicadangkan & dikembalikan)', fn:()=>{
 if(typeof runDataHealthCheck!=='function'||typeof openModal!=='function')return;
-const backupCobek=D.cobek,backupWorkDays=D.workDays;
+const backupShop=D.cobek,backupWorkDays=D.workDays;
 try{
-D.cobek=[{id:'__t_cobek__',date:'2026-01-01',items:[{productId:'__nonexistent_product__',name:'Produk Hantu',qty:1}],customer:{name:'Tes'},accountId:'__nonexistent_acc__',txLinkId:'__nonexistent_tx__',total:1000,profit:100}];
+D.cobek=[{id:'__t_shop__',date:'2026-01-01',items:[{productId:'__nonexistent_product__',name:'Produk Hantu',qty:1}],customer:{name:'Tes'},accountId:'__nonexistent_acc__',txLinkId:'__nonexistent_tx__',total:1000,profit:100}];
 D.workDays=[{id:'__t_wd__',date:'tanggal-ngawur',total:NaN}];
 runDataHealthCheck();
 const listHtml=document.getElementById('dataHealthList')?document.getElementById('dataHealthList').innerHTML:'';
-_selfTestAssert(listHtml.includes('produk tidak valid'),'Harus mendeteksi item Cobek yang produknya sudah dihapus');
+_selfTestAssert(listHtml.includes('produk tidak valid'),'Harus mendeteksi item Shop yang produknya sudah dihapus');
 _selfTestAssert(listHtml.includes('akun tidak valid')&&listHtml.includes('Shop'),'Harus mendeteksi transaksi Shop dengan akun tidak valid');
 _selfTestAssert(listHtml.includes('kehilangan transaksi tertaut')&&listHtml.includes('Shop'),'Harus mendeteksi transaksi Shop yang txLinkId-nya hilang');
 _selfTestAssert(listHtml.includes('Absensi dengan tanggal tidak valid'),'Harus mendeteksi absensi dengan tanggal rusak');
 _selfTestAssert(listHtml.includes('Absensi dengan total gaji tidak valid'),'Harus mendeteksi absensi dengan total gaji NaN/negatif');
 } finally {
-D.cobek=backupCobek; D.workDays=backupWorkDays;
+D.cobek=backupShop; D.workDays=backupWorkDays;
 closeModal('dataHealthModal');
 }
 }},
@@ -1685,7 +1685,7 @@ pBeli.value=backup.pBeli;pJual.value=backup.pJual;pReseller.value=backup.pResell
 {name:'UI: panel tab benar-benar terlihat (computed display) setelah tab diklik -- cegah bug "u-dnone (!important) menang lawan inline style display:block"', fn:()=>{
 const groups=[
 {page:'#page-carnotes',fn:(typeof setCnTab==='function')?setCnTab:null,paneId:t=>'cnTab-'+t},
-{page:'#page-cobek',fn:(typeof setCobekTab==='function')?setCobekTab:null,paneId:t=>'cobekTab-'+t},
+{page:'#page-shop',fn:(typeof setShopTab==='function')?setShopTab:null,paneId:t=>'shopTab-'+t},
 {page:'#page-pajak',fn:(typeof setPajakTab==='function')?setPajakTab:null,paneId:t=>'pajakTab-'+t},
 {page:'#page-keuangan',fn:(typeof setKeuanganTab==='function')?setKeuanganTab:null,paneId:t=>'keuanganTab-'+t},
 {page:'#page-keuangan',fn:(typeof BudgetTabs!=='undefined')?BudgetTabs.switchTo:null,paneId:t=>'budgetTabPane-'+t,btnClass:'.budget-tab-btn'}
@@ -1921,7 +1921,7 @@ return names.sort();
 const EXTRA_MODAL_SWEEP_SPECS=[
 {fn:'openQS',args:['qsKeuangan'],id:'qsKeuangan',close:()=>closeQS('qsKeuangan')},
 {fn:'openQS',args:['qsBillActions'],id:'qsBillActions',close:()=>closeQS('qsBillActions')},
-{fn:'openQS',args:['qsCobek'],id:'qsCobek',close:()=>closeQS('qsCobek')},
+{fn:'openQS',args:['qsShop'],id:'qsShop',close:()=>closeQS('qsShop')},
 {fn:'openQS',args:['qsCarnotes'],id:'qsCarnotes',close:()=>closeQS('qsCarnotes')},
 {fn:'openQS',args:['qsLaporan'],id:'qsLaporan',close:()=>closeQS('qsLaporan')},
 {fn:'openQS',args:['qsAI'],id:'qsAI',close:()=>closeQS('qsAI')},

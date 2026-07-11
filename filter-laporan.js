@@ -150,9 +150,9 @@ const f=getKeuFilters();
 const n=Object.values(f).filter(v=>v&&v!=='semua').length;
 btn.textContent=n?`🔍 Filter (${n})`:'🔍 Filter';
 }
-function goToList(targetId, pageName, navIdx, cobekTabName, cnTabName){
+function goToList(targetId, pageName, navIdx, shopTabName, cnTabName){
 const jump=()=>{
-if(cobekTabName){const tabs=document.querySelectorAll('#page-cobek .cn-tab');setCobekTab(cobekTabName,tabs[cobekTabName==='etalase'?1:cobekTabName==='produsen'?2:cobekTabName==='riwayat'?3:cobekTabName==='pelanggan'?4:0]);}
+if(shopTabName){const tabs=document.querySelectorAll('#page-shop .cn-tab');setShopTab(shopTabName,tabs[shopTabName==='etalase'?1:shopTabName==='produsen'?2:shopTabName==='riwayat'?3:shopTabName==='pelanggan'?4:0]);}
 if(cnTabName){const tabs=document.querySelectorAll('#page-carnotes .cn-tab');setCnTab(cnTabName,tabs[cnTabName==='servis'?1:0]);}
 const el=document.getElementById(targetId);
 if(!el)return;

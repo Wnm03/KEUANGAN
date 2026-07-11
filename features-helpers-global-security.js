@@ -28,8 +28,8 @@ if(location.hostname==='localhost'||location.hostname==='127.0.0.1')return true;
 }catch(e){ /* anggap bukan dev mode kalau gagal deteksi */ }
 return false;
 }
-const APP_BUILD_VERSION = 'kw80-absensi-pending-badge-avg-gaji-fincoach';
-const PRODUCTION_BUILD_SYNCED_VERSION = 'kw80-absensi-pending-badge-avg-gaji-fincoach';
+const APP_BUILD_VERSION = 'kw83-test-pengaturan-search-3';
+const PRODUCTION_BUILD_SYNCED_VERSION = 'kw83-test-pengaturan-search-3';
 let D = {
 schemaVersion:SCHEMA_VERSION,
 transactions:[],cobek:[],products:[],produsen:[],cobekKategori:JSON.parse(JSON.stringify(DEFAULT_COBEK_KATEGORI)),targets:[],eduFunds:[],reminders:[],bills:[],billsArchive:[],
@@ -249,7 +249,7 @@ console.error('data-onclick error:', code, err);
 if(typeof toast==='function') toast('⚠️ Terjadi error saat menjalankan aksi ini. Tolong laporkan ke pengembang.',5000);
 }
 });
-function migrateCobekCategory(){
+function migrateShopCategory(){
 let incCat=D.categories.income.find(c=>c.id==='cat_cb'||/^bisnis cobek$/i.test(c.name)||/^bisnis$/i.test(c.name));
 if(incCat){
 const oldName=incCat.name;
@@ -356,6 +356,7 @@ if(!D.sparepartCats||!D.sparepartCats.length) D.sparepartCats=JSON.parse(JSON.st
 D.sparepartCats.forEach(c=>{if(!c.code)c.code=codeFromName(c.name);});
 if(!D.partsStock) D.partsStock=[];
 if(!D.workDays) D.workDays=[];
+if(!D.payrollDismissedWeeks) D.payrollDismissedWeeks=[];
 if(!D.gajiMingguanHistory) D.gajiMingguanHistory=[];
 if(!D.tukangWorkers) D.tukangWorkers=[];
 if(!D.tukangAbsensi) D.tukangAbsensi=[];
@@ -368,7 +369,7 @@ D.products.forEach(p=>{if(!p.hargaByProdusen)p.hargaByProdusen={};if(p.kategoriI
 if(!D.categories.expense.some(c=>c.id==='cat_cbb'||/^bisnis$/i.test(c.name))){
 D.categories.expense.push({id:'cat_cbb',name:'Bisnis',emoji:'🪨',subs:[{id:'sub_cbb_cobek',name:'Cobek'}]});
 }
-migrateCobekCategory();
+migrateShopCategory();
 if(!D.cobek) D.cobek=[];
 if(!D.targets) D.targets=[];
 if(!D.eduFunds) D.eduFunds=[];

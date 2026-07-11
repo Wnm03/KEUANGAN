@@ -1,4 +1,4 @@
-// data-default.js — Domain Data Default: kategori cobek bawaan (DEFAULT_COBEK_KATEGORI),
+// data-default.js — Domain Data Default: kategori shop bawaan (DEFAULT_COBEK_KATEGORI),
 // akun keuangan bawaan (DEFAULT_ACCOUNTS), kategori sparepart kendaraan bawaan (DEFAULT_SPAREPARTS).
 // PENTING: file ini HARUS dimuat SEBELUM features-helpers-global-security.js (bukan sesudah,
 // beda dari file GROUP_B lainnya) — ketiga konstanta di sini dibaca LANGSUNG di dalam deklarasi
@@ -9,9 +9,9 @@
 // baru dikerjakan di v79 ini.
 
 const DEFAULT_COBEK_KATEGORI = [
-{id:'ck_kecil',name:'Cobek Kecil'},
-{id:'ck_sedang',name:'Cobek Sedang'},
-{id:'ck_besar',name:'Cobek Besar'},
+{id:'ck_kecil',name:'Shop Kecil'},
+{id:'ck_sedang',name:'Shop Sedang'},
+{id:'ck_besar',name:'Shop Besar'},
 {id:'ck_munthu',name:'Munthu/Ulekan'},
 {id:'ck_set',name:'Set Lengkap'},
 ];

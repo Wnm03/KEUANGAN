@@ -2576,3 +2576,84 @@ baris), `payroll-absensi.js` (365 baris), `renovasi.js` (437 baris),
 `features-aiwidget-reminder-gdrive-search.js` (1586 baris),
 `features-sheets-pwa-selftest.js` (2361 baris). Lanjutkan urutan
 ringan→berat: `filter-laporan.js` berikutnya.
+
+## Catatan kerja — 2026-07-11 (bagian ke-33): test `pengaturan-search.js`
+
+Konteks: diminta jalankan test "dari yg terkecil" mengikuti pola sesi
+sebelumnya. Ketemu `pengaturan-search.js` (72 baris) — modul ini KELEWAT
+dari daftar "sesi berikutnya" bagian ke-32 (kemungkinan krn dipindah dari
+`features-helpers-global-security.js` v73 belakangan, jadi belum sempat
+tercatat di daftar itu) — TAPI ternyata masih nol test dan LEBIH KECIL dari
+`filter-laporan.js` (220 baris) yg tercatat sbg "berikutnya". Diverifikasi
+dgn cek langsung: cari semua file source yg tidak direferensikan
+`loadSource([...])` di `tests/*.test.js` manapun. Dipilih `pengaturan-search.js`
+krn genuinely terkecil, mengikuti aturan ringan→berat apa adanya (bukan cuma
+ikut daftar tercatat). Tidak ada bug ditemukan — murni menambah test yg
+sebelumnya nol, tidak ada perubahan di kode aplikasi.
+
+**File baru: `tests/pengaturan-search.test.js` (23 test).** Cakupan
+`toggleStgGroup` (toggle kelas `open` + `aria-expanded` di `.stg-group-head`,
+guard `id` tidak ketemu, guard head tidak ada), `toggleSingleCardCollapse`
+(pola sama tapi utk `.card-collapse-head`), `stgSearch` (query kosong
+sembunyikan hasil, resultEl tidak ada, tidak ada kartu cocok vs ada,
+case-insensitive + trim, kartu di dalam grup tertutup ikut dibuka tapi TIDAK
+di-toggle tertutup lagi kalau grup sudah terbuka, kartu `card-collapse` ikut
+dibuka, highlight pencarian sebelumnya dibersihkan tiap pencarian baru,
+hasil pertama jadwalkan `scrollIntoView` via `setTimeout`), dan listener
+`keydown` top-level (Enter/Spasi di `.stg-group-head,.card-collapse-head` →
+`preventDefault()` + `head.click()`, tombol lain/target tidak cocok/
+`target.closest` tidak ada → no-op).
+
+**Catatan teknis — 2 jebakan `fakeDom.js` yg bikin salah di percobaan
+pertama:**
+1. `createFakeDocument({id: objekBuatanSendiri})` melakukan
+   `Object.assign(elemenAutoVivify, objekBuatanSendiri)` di dalam `ensure()`
+   — properti PRIMITIF (`textContent` string) di-copy NILAI-nya ke objek
+   auto-vivify yg BEDA dari variabel lokal test, jadi assert langsung ke
+   variabel lokal `resultEl.textContent` setelah manggil `stgSearch()` selalu
+   baca nilai lama (`''`). Field OBJEK (`style`/`classList`) tetap aman
+   dibaca dari variabel lokal krn Object.assign cuma copy REFERENCE utk
+   objek, bukan primitif. Fix: ambil ulang elemen via
+   `fakeDocument.getElementById(id)` SETELAH pemanggilan fungsi yg dites,
+   baru assert `textContent`-nya.
+2. Konfirmasi ulang jebakan `classList` dari catatan bagian ke-31: passing
+   literal `{classList:['u-dnone']}` sbg value `initial` ke
+   `createFakeDocument` menimpa `classList` jadi array polos tanpa
+   `contains()`/`remove()` — harus `createFakeElement({classList:[...]})`
+   dulu baru dipassing sbg value `initial`.
+3. `assert.deepEqual`/`deepStrictEqual` GAGAL membandingkan object literal
+   yg dibuat DI DALAM `vm` sandbox (mis. argumen `scrollIntoView({behavior,
+   block})` yg dipanggil dari source app yg jalan di context vm) dgn object
+   literal host Node biasa — walau isinya identik, prototype `Object`-nya
+   beda REALM jadi dianggap tidak sama. Fix: assert per-field alih-alih
+   `deepEqual` utk nilai yg berasal dari dalam sandbox vm.
+
+**Diverifikasi:**
+- `node --test tests/*.test.js` → **864/864 pass, 0 fail** (naik dari 841,
+  +23 test baru [pengaturan-search], 0 regresi).
+- Sanity-check tambahan: sengaja rusak 1 baris logika `stgSearch` (ganti
+  pesan hasil jadi string statis) → 3 test relevan langsung merah, lalu
+  dikembalikan → hijau lagi. Konfirmasi test baru ini benar-benar menguji
+  perilaku, bukan cuma lolos scaffolding kosong.
+- `node build.js kw83-test-pengaturan-search-1` → sukses (versi lama
+  `kw82-test-tx-stok-sparepart` tidak berakhiran `-angka` jadi auto-increment
+  gagal, dikasih nama versi manual sesuai saran error `build.js`), build
+  #185, kedua bundle lolos `node --check` sintaks, `FILE-MAP.md` diregenerasi
+  (`pengaturan-search.js` otomatis hilang dari daftar nol-test).
+- `npm run lint`/`npx eslint` & smoke-test browser (Playwright) TIDAK bisa
+  dites di sesi ini (sandbox tanpa internet/`node_modules`/Chrome
+  terpasang) — tolong jalankan sebelum merge/release.
+
+**Untuk sesi berikutnya — daftar modul nol-test yg TERSISA:**
+`filter-laporan.js` (220 baris), `kasir.js` (221 baris), `sewakios.js` (242
+baris), `linktx.js` (244 baris), `modal-navigasi.js` (284 baris),
+`payroll-absensi.js` (365 baris), `renovasi.js` (437 baris),
+`tagihan-kalender.js` (443 baris), `backup-restore.js` (718 baris),
+`cobek.js` (1261 baris, terbesar, disisakan paling akhir),
+`features-aiwidget-reminder-gdrive-search.js` (1586 baris),
+`features-sheets-pwa-selftest.js` (2361 baris). Lanjutkan urutan
+ringan→berat: `filter-laporan.js` berikutnya. **PENTING:** cek ulang daftar
+ini dgn cara yg sama spt bagian ke-33 (cari file source yg tidak
+direferensikan `loadSource([...])` di test manapun) sebelum mulai, jangan
+cuma percaya daftar tercatat — sudah kejadian 1x (`pengaturan-search.js`)
+kelewat dari daftar.

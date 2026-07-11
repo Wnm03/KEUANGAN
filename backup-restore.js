@@ -115,14 +115,14 @@ _saveGuards['fullBackup']=false;
 if(btn)btn.textContent=done.includes('File lokal (JSON)')?'💾 Backup':(btnOriginal||'⚠️ Backup');
 }
 }
-let backupModules={keuangan:true,carnotes:true,cobek:true,aset:true,renov:true,pensiunZakat:true,habit:true,lain:true};
+let backupModules={keuangan:true,carnotes:true,shop:true,aset:true,renov:true,pensiunZakat:true,habit:true,lain:true};
 function openBackupModal(){
 document.getElementById('bPeriode').value='selamanya';
 document.getElementById('bCustomRange').style.display='none';
 document.getElementById('bTipe').value='semua';
 document.getElementById('bFormat').value='json';
-backupModules={keuangan:true,carnotes:true,cobek:true,aset:true,renov:true,pensiunZakat:true,habit:true,lain:true};
-['bModKeuangan','bModCarnotes','bModCobek','bModAset','bModRenov','bModPensiunZakat','bModHabit','bModLain'].forEach(id=>document.getElementById(id).classList.add('active'));
+backupModules={keuangan:true,carnotes:true,shop:true,aset:true,renov:true,pensiunZakat:true,habit:true,lain:true};
+['bModKeuangan','bModCarnotes','bModShop','bModAset','bModRenov','bModPensiunZakat','bModHabit','bModLain'].forEach(id=>document.getElementById(id).classList.add('active'));
 openModal('backupModal');
 }
 function toggleBackupModule(mod,el){
@@ -163,7 +163,7 @@ out.jalanLogs=D.jalanLogs.filter(j=>inRange(j.date,from,to));
 out.kmLogs=D.kmLogs.filter(k=>inRange(k.date,from,to));
 out.simList=D.simList||[];
 }
-if(backupModules.cobek){
+if(backupModules.shop){
 out.products=D.products;
 out.produsen=D.produsen;
 out.cobekKategori=D.cobekKategori;
@@ -382,7 +382,7 @@ D.products.forEach(p=>{if(!p.hargaByProdusen)p.hargaByProdusen={};if(p.kategoriI
 if(!D.categories.expense.some(c=>c.id==='cat_cbb'||/^bisnis$/i.test(c.name))){
 D.categories.expense.push({id:'cat_cbb',name:'Bisnis',emoji:'🪨',subs:[{id:'sub_cbb_cobek',name:'Cobek'}]});
 }
-migrateCobekCategory();
+migrateShopCategory();
 if(!D.targets)D.targets=[];
 if(!D.eduFunds)D.eduFunds=[];
 if(!D.reminders)D.reminders=[];
@@ -591,7 +591,7 @@ out.push(cur);
 return out.map(v=>v.trim().replace(/^"|"$/g,''));
 }
 const CAT_EMOJI_GUESS=[
-[/gaji|penghasilan|salary/i,'💼'],[/bonus/i,'🎁'],[/bisnis|usaha|jual|dagang|cobek/i,'🪨'],
+[/gaji|penghasilan|salary/i,'💼'],[/bonus/i,'🎁'],[/bisnis|usaha|jual|dagang|shop/i,'🪨'],
 [/hadiah|donasi|kurban|thr|tahlilan/i,'🎁'],[/investasi|invest/i,'📈'],[/kebun|tani/i,'🌾'],
 [/kiriman|istri/i,'👩'],[/kendaraan|motor|vario|beat|grandmax|transport/i,'🏍️'],
 [/bpjs|kesehatan|obat|apotik/i,'💊'],[/tagihan|listrik|wifi|pulsa|kuota|telepon|handphone|hp/i,'🧾'],
